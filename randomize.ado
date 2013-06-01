@@ -9,6 +9,8 @@ version 12.0
 * 
 * Stata version 12 is required due to the p-value matrix on regression results, but CM has a code fix to support version 11.
 
+* CREDITS: Thank you to Debby Kermer for earlier contributions to parts of the algorithms.
+
 *!Author: Christopher B. Mann, Chris J. Kennedy
 *!Date: 2013-03-14
 */
