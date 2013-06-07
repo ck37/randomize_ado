@@ -131,8 +131,8 @@ gen `standard_order' = _n
 * Stratified randomization with optimization in each strata.
 * This loop will run once if we are not blocking on anything.
 forvalues strata_num = 1/`num_strata' {
-    * TODO: why is this next line commented out? may be a bug.
-	* cap sum `strata_cnt' if `strata_current' == `strata_num'
+    * TODO: determine if this next line should be commented out? may be a bug.
+	cap sum `strata_cnt' if `strata_current' == `strata_num'
 	local strata_size = r(max)
 	dis "Randomizing stratum `strata_num' with `strata_size' records."
 
