@@ -104,9 +104,9 @@ tempvar strata_current strata_cnt rand_assign_current strata_cnt standard_order
 * Display current setup.
 *----------------------------------
 	
-dis "Balance variables: `balance'"
+dis "Balance variables: " as result "`balance'" as text "."
 local num_balance_vars: word count `balance'
-dis "Number of balance variables: `num_balance_vars'"
+dis "Number of balance variables: " as result "`num_balance_vars'" as text "."
 	
 * Renumber Strata for each data subset
 if "`block'" != "" {
@@ -116,7 +116,7 @@ else {
 	* No blocking needed.
 	gen `strata_current' = 1 if `touse'
 }
-tab `strata_current'
+qui tab `strata_current'
 local num_strata = r(r)
 
 *-------------------------------------------------------------------------- 
