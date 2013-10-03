@@ -9,7 +9,7 @@ version 12.0
 * 
 * Stata version 12 is required due to the p-value matrix on regression results, but CM has a code fix to support version 11.
 
-* CREDITS: Thank you to Debby Kermer for earlier contributions to parts of the algorithm.
+* CREDITS: Thank you to Debby Kermer for earlier contributions to parts of the algorithm, and to John Ternovski for comments.
 
 *!Author: Christopher B. Mann, Chris J. Kennedy
 *!Date: 2013-03-14
@@ -56,7 +56,7 @@ TODO/Thoughts:
 
 
 
-syntax [if] [in] [, GRoups(integer 2) MINruns(integer 10) MAXruns(integer 10) BALance(varlist) BLock(varlist) COEFFthreshold(real 0.05) JOintp(real 0.5) GENerate(name) seed(real 37) REPlace]
+syntax [if] [in] [, GRoups(integer 2) MINruns(integer 10) MAXruns(integer 10) BALance(string) BLock(varlist) COEFFthreshold(real 0.05) JOintp(real 0.5) GENerate(name) seed(real 37) REPlace]
 
 qui: marksample touse // Exclude observations that do not meet the IF or IN criteria (if specified).
 
@@ -87,11 +87,6 @@ if _rc == 0 {
 * Create the assignment variable.
 cap gen `generate' = . if `touse'
 
-
-*++++++++++++++++++++++++++++++++++
-* Begin randomization algorithm.
-*++++++++++++++++++++++++++++++++++
-
 * Create temporary variables.
 tempvar strata_current strata_cnt rand_assign_current strata_cnt standard_order
 * tempname balance_vars
@@ -116,7 +111,8 @@ else {
 	* No blocking needed.
 	gen `strata_current' = 1 if `touse'
 }
-qui tab `strata_current'
+dis "Strata breakdown:"
+tab `strata_current' if `touse'
 local num_strata = r(r)
 
 *-------------------------------------------------------------------------- 
@@ -164,9 +160,9 @@ forvalues strata_num = 1/`num_strata' {
 			
 		cap replace `rand_assign_current' = runiform() if `touse'
 		* Sort each strata in random order and calculate size of each strata
-		sort `strata_current' `rand_assign_current'
 		cap bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `strata_current' == `strata_num'
 		* Loop through the groups and assign a proportional allocation to each.
+		* NOTE: may be able to simplify using seq(), although this may result in group 1 getting slightly more cases in which case it isn't worth it - TBD.
 		forvalues rand_group = `groups'(-1)1 {
 			* dis "replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'"
 			cap replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'
@@ -177,7 +173,7 @@ forvalues strata_num = 1/`num_strata' {
 		*----------------------------------
 		* Use "noommitted" option so that omitted collinnear terms are not examined in p-value check.
 		* This is not strictly necessary, but is cleaner.
-		cap mlogit `generate' `balance_vars' if `strata_current' == `strata_num', base(1) noomitted				
+		qui mlogit `generate' `balance_vars' if `strata_current' == `strata_num', base(1) noomitted				
 
 		*** TODO: rename this joint_p to not be as similar to the program parameter.
 		local joint_p = e(p)
