@@ -41,10 +41,11 @@ How to add this ado file to your Stata search path:
 - Or you can type: adopath + "~/somefolder" to have Stata also search a new folder for .ado programs.
 
 TODO/Thoughts:
+- Use of "if `touse'" needs to be reviewed & tested, as there may be some edge cases that should be fixed.
+- Blocking code still needs to be formally tested.
 - Should sortseed also be a parameter so that it is defaulted?
-- Blocking code still needs to be tested - may be buggy.
 - Convert local variables to tempvars so that we don't pollute the global namespace (for local variables).
-- Scale down what should be displayed to the user.
+- Scale back what is displayed to the user.
 - Do we want the result to also be randomly ordered, or not? Presume yes - useful when a voter contact program does not run through all records (e.g. phones).
 - Would we want to save the probability that a record is assigned to a given class across all attempted randomizations? May be useful for randomization inference.
 - This is basically bootstrapped randomization - may suggest similar parameters and output strategies. Also should look at MCMC simulation programming.
@@ -122,7 +123,7 @@ local num_strata = r(r)
 * Setup basic variables.
 cap gen `rand_assign_current' = .
 bysort `strata_current': gen `strata_cnt' = _n
-gen `standard_order' = _n
+gen `standard_order' = _n 
 	
 * Stratified randomization with optimization in each strata.
 * This loop will run once if we are not blocking on anything.
@@ -173,6 +174,8 @@ forvalues strata_num = 1/`num_strata' {
 		*----------------------------------
 		* Use "noommitted" option so that omitted collinnear terms are not examined in p-value check.
 		* This is not strictly necessary, but is cleaner.
+		
+		* Note: we may want to examine n-1 potential bases for a 3+ group assignment in the future, for the minimum coefficient p-value statistic.
 		qui mlogit `generate' `balance_vars' if `strata_current' == `strata_num', base(1) noomitted				
 
 		*** TODO: rename this joint_p to not be as similar to the program parameter.
@@ -194,7 +197,12 @@ forvalues strata_num = 1/`num_strata' {
 
 		* String variable to output if we updated our best attempt with this try.
 		local used_try = ""
- 				
+		
+		* Save this randomization as the current best if at least one of three criteria are met:
+		* 1. The LR p-value threshold is exceeded, our minimum coefficient p-value threshold is exceeded, and the minimum coefficent p-value is higher than our prior best.
+		* 2. The current LR p-value is better than our previous best.
+		* 3. The current LR p-value is equal to our previous best but the minimum coefficient p-value is higher.
+		* Note: the logic for case #3 may need to be tweaked in the below algorithm.
  		if ( (`joint_p' >= `coeffthreshold' & `temp_min' >= `coeffthreshold' & `min' < `coeffthreshold') ///
 			| (`joint_p' >= `best_joint_p' & (`temp_min' >= `coeffthreshold' | `min' < `coeffthreshold' | `best_joint_p' < `jointp'))) {
 			local best_run = `tries'
