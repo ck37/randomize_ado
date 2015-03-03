@@ -57,8 +57,8 @@ if "`generate'" == "" {
 * Check if the specified generate variable already exists.
 cap confirm variable `generate', exact
 if _rc == 0 {
-   * Drop the prior assignment variable if it is the default name or if the replace option was chosen.
-   if "`generate'" == "`default_generate'" | "`replace'" != ""  {
+   * Drop the prior assignment variable if the replace option was chosen.
+   if "`replace'" != ""  {
 	 qui drop `default_generate'
    }
    else {
