@@ -1,7 +1,7 @@
 randomize.ado
 =============
 
-Stata module for random assignment, including balance checking, blocking, and automated re-randomization.
+Stata module for random assignment, including blocking, balance checking, and automated re-randomization.
 
 Installation
 --------
