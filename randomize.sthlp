@@ -26,8 +26,8 @@
 {marker desc}{title:Description}
 
 {pstd} {cmd:randomize} conducts random assignment of units to equally sized groups. It can check for balance on a specified list of covariates.
-If blocking variables are specified it will conduct the randomization within blocks. It can rerandomize within blocks a certain number of times, such as taking the
-randomization with the best covariate balance out of 100 tries. It can also rerandomize until the balance statistic (likelihood ratio on a multinomial logit)
+If blocking variables are specified it will conduct the randomization within blocks. It can rerandomize within blocks a certain number of times, such as conducting 100 randomizations
+and choosing the randomization with the best balance across covariates. It can also rerandomize until the balance statistic (likelihood ratio on a multinomial logit)
 exceeds a certain cut-off value (e.g. 0.2). If unequal allocation sizes are desired, multiple groups can be aggregated after the randomization.
 
 {pstd} For clustered random assignment, one will need to handle the clustering manually, such as collapsing the dataset to the cluster level or choosing one representative unit
@@ -49,7 +49,7 @@ per cluster. The randomization algorithm can then be run on that dataset, and th
 
 {pstd} {opt jointp(real)} - minimum joint p-value allowable to accept a given randomization, ranging from 0 to 1. This p-value comes from a likelihood ratio test on a multinomial logit. {p_end}
 
-{pstd} {opt seed(integer)} - the random number generator seed to use, which ensures the randomization is deterministically repeatable. {p_end}
+{pstd} {opt seed(integer)} - the random number generator seed to use, which ensures the randomization is deterministically repeatable. As usual, the seed (and sortseed) can also simply be set outside of the module per general Stata practice. {p_end}
 
 {pstd} {opt replace} - overwrite the assignment variable if it already exists in the dataset. The script will generate an error if the assignment variable already exists and replace is not specified. {p_end}
 
