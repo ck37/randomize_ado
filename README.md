@@ -3,6 +3,11 @@ randomize.ado
 
 Stata module for random assignment, including balance checking, blocking, and automated re-randomization.
 
+Installation
+--------
+
+Download the .ado and .shlp files, putting them in a directory, like ~/Documents/randomize/. Then add that folder to Stata's search path for ado files: adopath + "~/Documents/randomize/". You will then be able to run the command and view the help files within Stata.
+
 Examples
 --------
 
@@ -26,8 +31,12 @@ Examples
   
 4. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
 
-<To be added>
+  ```stata
+  <To be added>
+  ```
 
 5. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
 
-<To be added>
+  ```stata
+  <To be added>
+  ```
