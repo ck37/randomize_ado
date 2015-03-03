@@ -40,3 +40,8 @@ Examples
   ```stata
   <To be added>
   ```
+
+6. Quiet randomization - use the quiet prefix to hide randomization output.
+```stata
+  qui randomize, balance(state) minruns(1000)
+  ```
