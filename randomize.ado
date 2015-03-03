@@ -62,7 +62,7 @@ if _rc == 0 {
 	 qui drop `default_generate'
    }
    else {
-     dis as err "variable `generate' already defined."
+     dis as err "Error: variable `generate' already defined. Use the 'replace' option if you would like to automatically overwrite the assignment variable."
      exit	 
    }
 }
