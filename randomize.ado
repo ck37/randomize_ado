@@ -3,42 +3,22 @@ program define randomize
 version 12.0
 
 /*
-* Conduct random assignment of a target population, dividing the recordly evenly across 2 or more groups.
-* Optionally re-randomize a given number of times and choose the randomization with the best balance across a set of covariates.
-* Also supports blocking.
 * 
 * Stata version 12 is required due to the p-value matrix on regression results, but CM has a code fix to support version 11.
-
-* CREDITS: Thank you to Debby Kermer for earlier contributions to parts of the algorithm, and to John Ternovski for comments.
-
-*!Author: Christopher B. Mann, Chris J. Kennedy
-*!Date: 2013-03-14
+*
+*!Author: Chris J. Kennedy, Christopher B. Mann
+*!Date: 2015-03-05
 */
 
-/*---------------------------------*
-* Example syntax: randomize
- - optional settings:
-	groups(integer) -> number of groups to create of equal size within the assignment variable, default to 2.
-	minruns() -> minimum number of randomizations to run, default to 10. If blocks are specified this parameter will be per-block.
-	maxruns() -> maximum number of randomizations to run, default to 10. If blocks are specified this parameter will be per-block.
-	coeffthreshold() -> minimum p-value for an individual coefficient allowable to accept a given randomization. [may need to rename/rethink if we add mahalanohbis distance support.]
-	jointp() -> minimum joint p-value allowable to accept a given randomization. [may need to rename/rethink if we add mahalanohbis distance support.]
-	gen(newvar) -> name of the assignment variable, defaulting to _assignment.
-	block(varlist) -> list of variables to block on.
-	seed(integer) -> the random number generator seed to use, which ensures the randomization is deterministically repeatable.
-	replace -> specify if the assignment variable can be replaced upon generation. If not, the script will generate an error if the assignment variable already exists.
- - options to potentially add later:	
+/*
+ - options to potentially add later:
+    aggregate() -> aggregate 
  	mahalanobis distance support.
  	model(mlogit, mprobit, mahalanobis, etc.) -> algorithm used to assess balance. (Not Supported Yet)
  	nolog -> don't show the re-randomization log.
 	TARgets(numlist >0 <=3 integer) -> moments of each covariate to control for, 1 = mean, 2 = variance, 3 = skewness.
 	support for maximation customization, e.g. iterations(#) vce(passthru)
 	saveseed(varname) if blocking is used, save the randomization seed used within each strata for QC purposes.
-
-NOTES:
-How to add this ado file to your Stata search path:
-- You can type "sysdir" to see which folders you can put the ado file into for Stata to pick it up.
-- Or you can type: adopath + "~/somefolder" to have Stata also search a new folder for .ado programs.
 
 TODO/Thoughts:
 - Use of "if `touse'" needs to be reviewed & tested, as there may be some edge cases that should be fixed.
@@ -52,12 +32,14 @@ TODO/Thoughts:
 - Create unit tests to confirm that the randomization algorithm works correctly for a variety of experimental scenarios.
 - Allow percentage breakdown between assignment groups (e.g. 70%/20%/10%) but then don't do automatic re-randomization per Lock / Rubin.
 - Support cluster randomization directly within the algorithm eventually.
+- Develop an algorithm to rank how imbalanced given covariates are.
+- Give a warning if the smallest strata size appearse too small to randomize to the given number of groups (e.g. at least 20 records per randomization group as a rule of thumb, or something relative to the # of balance covariates, e.g. twice).
 
 ====================================*/
 
 
 
-syntax [if] [in] [, GRoups(integer 2) MINruns(integer 10) MAXruns(integer 10) BALance(string) BLock(varlist) COEFFthreshold(real 0.05) JOintp(real 0.5) GENerate(name) seed(real 37) REPlace]
+syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) COEFFthreshold(real 0) JOintp(real 0.5) GENerate(name) seed(real 37) REPlace]
 
 qui: marksample touse // Exclude observations that do not meet the IF or IN criteria (if specified).
 
@@ -77,7 +59,7 @@ cap confirm variable `generate', exact
 if _rc == 0 {
    * Drop the prior assignment variable if it is the default name or if the replace option was chosen.
    if "`generate'" == "`default_generate'" | "`replace'" != ""  {
-	 cap drop `default_generate'
+	 qui drop `default_generate'
    }
    else {
      dis as err "variable `generate' already defined."
@@ -86,7 +68,7 @@ if _rc == 0 {
 }
 
 * Create the assignment variable.
-cap gen `generate' = . if `touse'
+qui gen `generate' = . if `touse'
 
 * Create temporary variables.
 tempvar strata_current strata_cnt rand_assign_current strata_cnt standard_order
@@ -121,7 +103,7 @@ local num_strata = r(r)
 *-------------------------------------------------------------------------- 
 
 * Setup basic variables.
-cap gen `rand_assign_current' = .
+qui gen `rand_assign_current' = .
 bysort `strata_current': gen `strata_cnt' = _n
 gen `standard_order' = _n 
 	
@@ -129,7 +111,7 @@ gen `standard_order' = _n
 * This loop will run once if we are not blocking on anything.
 forvalues strata_num = 1/`num_strata' {
     * TODO: determine if this next line should be commented out? may be a bug.
-	cap sum `strata_cnt' if `strata_current' == `strata_num'
+	qui sum `strata_cnt' if `strata_current' == `strata_num'
 	local strata_size = r(max)
 	dis "Randomizing stratum `strata_num' with `strata_size' records."
 
@@ -159,14 +141,14 @@ forvalues strata_num = 1/`num_strata' {
 		* Sort these records deterministically.
 		sort `standard_order'
 			
-		cap replace `rand_assign_current' = runiform() if `touse'
+		qui replace `rand_assign_current' = runiform() if `touse'
 		* Sort each strata in random order and calculate size of each strata
-		cap bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `strata_current' == `strata_num'
+		qui bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `strata_current' == `strata_num'
 		* Loop through the groups and assign a proportional allocation to each.
 		* NOTE: may be able to simplify using seq(), although this may result in group 1 getting slightly more cases in which case it isn't worth it - TBD.
 		forvalues rand_group = `groups'(-1)1 {
 			* dis "replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'"
-			cap replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'
+			qui replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'
 		}
 	
 		*----------------------------------
@@ -176,8 +158,18 @@ forvalues strata_num = 1/`num_strata' {
 		* This is not strictly necessary, but is cleaner.
 		
 		* Note: we may want to examine n-1 potential bases for a 3+ group assignment in the future, for the minimum coefficient p-value statistic.
-		qui mlogit `generate' `balance_vars' if `strata_current' == `strata_num', base(1) noomitted				
+		mlogit `generate' `balance_vars' if `strata_current' == `strata_num', base(1) noomitted
+		
+		* manova `balance_vars' = `generate' if `strata_current' == `strata_num'
+* 		return list
 
+		mvtest means `balance_vars' if `strata_current' == `strata_num', by(`generate')
+		matrix p = r(stat_m)
+		* Extract the Wilks' lambda.
+		local joint_p = p[1, 5]
+		* Set this just to keep the current algorithm working.
+		local temp_min = 0
+/*
 		*** TODO: rename this joint_p to not be as similar to the program parameter.
 		local joint_p = e(p)
 		* Create p-value matrix for each variable
@@ -193,6 +185,7 @@ forvalues strata_num = 1/`num_strata' {
 				* Min() ignores p-values that are missing, such as for the base case.
 			}
 		}
+		*/
 						
 
 		* String variable to output if we updated our best attempt with this try.
