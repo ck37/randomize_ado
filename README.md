@@ -11,7 +11,7 @@ Download the .ado and .shlp files, putting them in a directory, like ~/Documents
 Examples
 --------
 
-1. Minimal - randomize a dataset into two groups, choosing the best of 10 randomizations based on balance by gender.
+1. Minimal - randomize a dataset into two groups, checking for balance by gender.
 
   ```
   randomize, balance(gender)
