@@ -11,26 +11,22 @@ version 12.0
 */
 
 /*
- - options to potentially add later:
-    aggregate() -> aggregate 
- 	mahalanobis distance support.
- 	model(mlogit, mprobit, mahalanobis, etc.) -> algorithm used to assess balance. (Not Supported Yet)
- 	nolog -> don't show the re-randomization log.
-	TARgets(numlist >0 <=3 integer) -> moments of each covariate to control for, 1 = mean, 2 = variance, 3 = skewness.
-	support for maximation customization, e.g. iterations(#) vce(passthru)
-	saveseed(varname) if blocking is used, save the randomization seed used within each strata for QC purposes.
+Future potential options:
+- mahalanobis distance support.
+- model(mlogit, mprobit, mahalanobis, etc.) -> algorithm used to assess balance. (Not Supported Yet)
+- TARgets(numlist >0 <=3 integer) -> moments of each covariate to control for, 1 = mean, 2 = variance, 3 = skewness.
+- support for maximation customization, e.g. iterations(#) vce(passthru)
+- saveseed(varname) if blocking is used, save the randomization seed used within each strata for QC purposes.
 
 TODO/Thoughts:
 - Use of "if `touse'" needs to be reviewed & tested, as there may be some edge cases that should be fixed.
 - Blocking code still needs to be formally tested.
 - Should sortseed also be a parameter so that it is defaulted?
 - Convert local variables to tempvars so that we don't pollute the global namespace (for local variables).
-- Scale back what is displayed to the user.
 - Do we want the result to also be randomly ordered, or not? Presume yes - useful when a voter contact program does not run through all records (e.g. phones).
 - Would we want to save the probability that a record is assigned to a given class across all attempted randomizations? May be useful for randomization inference.
 - This is basically bootstrapped randomization - may suggest similar parameters and output strategies. Also should look at MCMC simulation programming.
 - Create unit tests to confirm that the randomization algorithm works correctly for a variety of experimental scenarios.
-- Allow percentage breakdown between assignment groups (e.g. 70%/20%/10%) but then don't do automatic re-randomization per Lock / Rubin.
 - Support cluster randomization directly within the algorithm eventually.
 - Develop an algorithm to rank how imbalanced given covariates are.
 - Give a warning if the smallest strata size appearse too small to randomize to the given number of groups (e.g. at least 20 records per randomization group as a rule of thumb, or something relative to the # of balance covariates, e.g. twice).
