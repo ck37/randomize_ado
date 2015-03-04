@@ -1,0 +1,5 @@
+v 3
+d randomize random assignment with blocking, balance, and automated rerandomization.
+d Chris J. Kennedy, UC Berkeley. Christopher B. Mann, Louisiana State University.
+f randomize.ado
+f randomize.sthlp
