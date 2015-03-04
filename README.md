@@ -11,37 +11,50 @@ Download the .ado & .shlp files and put them in a directory, such as ~/Documents
 Examples
 --------
 
-1. Minimal - randomize a dataset into two groups, checking for balance by gender.
+1. Randomize a dataset into 2 groups, checking for balance by gender.
 
   ```
   randomize, balance(gender)
   ```
 
-2. Basic - randomize a dataset into three groups, check for balance on age and gender, ensuring that the joint balance test (LR) is greater than 0.2.
+2. Randomize a dataset into 5 equally-sized groups, blocking by state and gender.
 
   ```
-  randomize, groups(3) balance(age gender) jointp(0.2)
+  randomize, groups(5) block(state gender)
   ```
 
-3. Advanced - create 4 groups, check for covariate balance on gender, race, and age, block on state, choose the most balanced of 500 randomizations within each block, and specify the random number generator seed.
+3. Randomize a dataset into 3 groups, checking for balance on age and gender. Rerandomize up to 100 times or until the balance p-value exceeds 0.2.
+
+  ```
+  randomize, groups(3) balance(age gender) jointp(0.2) maxruns(100)
+  ```
+
+4. Create 4 groups, check for covariate balance on gender, race, and age, block on state, choose the most balanced of 500 randomizations within each block, and specify the random number generator seed.
 
   ```stata
   randomize, groups(4) balance(gender race age) block(state) minruns(500) seed(1)
   ```
   
-4. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
+5. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
 
   ```stata
   <To be added>
   ```
 
-5. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
+6. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
 
   ```stata
   <To be added>
   ```
 
-6. Quiet randomization - use the quiet prefix to hide randomization output.
+7. Quiet randomization - use the quiet prefix to hide all randomization output.
+
   ```stata
   qui randomize, balance(state) minruns(1000)
+  ```
+
+8. Detailed randomization - use the details option show all randomization output.
+
+  ```stata
+  randomize, balance(state) minruns(1000) details
   ```
