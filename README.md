@@ -35,10 +35,10 @@ Examples
   randomize, groups(4) balance(gender race age) block(state) minruns(500) seed(1)
   ```
 
-5. Create a 30% / 70% split by randomizing into 10 equally sized groups then aggregating those assignments.
+5. Create a 10% / 20% / 70% split by randomizing into 10 equally sized groups then aggregating those assignments.
 
   ```stata
-  randomize, groups(10) aggregate(3 7)
+  randomize, groups(10) aggregate(1 2 7)
   ```  
   
 6. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
