@@ -47,13 +47,13 @@ Examples
   randomize, groups(10) aggregate(1 2 7)
   ```  
 
-6. Quiet randomization - use the quiet prefix to hide all randomization output.
+6. Use the quiet prefix to hide all randomization output and just get the result.
 
   ```stata
-  qui randomize, balance(state) minruns(1000)
+  quiet randomize, balance(state) minruns(1000)
   ```
 
-7. Detailed randomization - use the details option show all randomization output.
+7. Use the details option show all randomization output.
 
   ```stata
   randomize, balance(state) minruns(1000) details
