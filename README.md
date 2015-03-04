@@ -6,6 +6,8 @@ Stata module for random assignment, including blocking, balance checking, and au
 Installation
 --------
 
+*Manual version*
+
 Download the .ado & .shlp files and put them in a directory, such as ~/Documents/randomize/. Then add that folder to Stata's search path for ado files:
 
   ```stata
@@ -13,6 +15,16 @@ Download the .ado & .shlp files and put them in a directory, such as ~/Documents
   ```
 
 You will then be able to run the command and view the help files within Stata.
+
+*Git version*
+
+Install the stata-git package, then use that to install the module directly from github.com. This requires that your system have "git" available via the command line.
+
+  ```stata
+  ssc install git
+  git install http://github.com/ck37/randomize.ado
+  ```
+
 
 Examples
 --------
