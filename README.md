@@ -34,26 +34,32 @@ Examples
   ```stata
   randomize, groups(4) balance(gender race age) block(state) minruns(500) seed(1)
   ```
+
+5. Create a 30% / 70% split by randomizing into 10 equally sized groups then aggregating those assignments.
+
+  ```stata
+  randomize, groups(10) aggregate(3 7)
+  ```  
   
-5. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
+6. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
 
   ```stata
   <To be added>
   ```
 
-6. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
+7. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
 
   ```stata
   <To be added>
   ```
 
-7. Quiet randomization - use the quiet prefix to hide all randomization output.
+8. Quiet randomization - use the quiet prefix to hide all randomization output.
 
   ```stata
   qui randomize, balance(state) minruns(1000)
   ```
 
-8. Detailed randomization - use the details option show all randomization output.
+9. Detailed randomization - use the details option show all randomization output.
 
   ```stata
   randomize, balance(state) minruns(1000) details
