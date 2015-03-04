@@ -14,7 +14,7 @@ Download the zip file of the repository ([link](https://github.com/ck37/randomiz
   . adopath + "~/Documents/randomize.ado-master/"
   ```
 
-You will then be able to run the command and view the help files within Stata.
+You will then be able to run the command and view the help file within Stata.
 
 *Git version*
 
