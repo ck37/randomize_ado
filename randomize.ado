@@ -147,7 +147,7 @@ forvalues strata_num = 1/`num_strata' {
 		timer off 37
 		timer on 37
 			
-		local tries = `tries' + 1
+		local ++tries
 		*--------------
 		* Randomize
 		*--------------
@@ -283,7 +283,8 @@ if "`aggregate'" != "" {
 	foreach value in `aggregate' {
 		qui replace `temp_assignment' = `assignment_iterator' if `generate' >= `group_start' & `generate' < (`group_start' + `value')
 		* Iterate the aggregated assignment value.
-		local assignment_iterator = `assignment_iterator' + 1
+		local ++assignment_iterator
+
 		* Move up the assignment values we are working with, so that the next iteration will process that set of assignments.
 		local group_start = `group_start' + `value'
 	}
