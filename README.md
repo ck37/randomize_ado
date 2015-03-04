@@ -12,7 +12,7 @@ Stata 13 can install directly from github. If using Stata 12 this method may not
 
   ```stata
   net install randomize, from(https://raw.githubusercontent.com/ck37/randomize_ado/master/)
-  ``
+  ```
 
 *Manual version*
 
