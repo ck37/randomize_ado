@@ -18,7 +18,7 @@ You will then be able to run the command and view the help files within Stata.
 
 *Git version*
 
-Install the stata-git package, then use that to install the module directly from github.com. This requires that your system have "git" available via the command line.
+Install the [stata-git package](https://github.com/coderigo/stata-git), then use that to install randomize.ado directly from github.com. This requires that your system have "git" available via the command line.
 
   ```stata
   . ssc install git
