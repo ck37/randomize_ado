@@ -39,7 +39,7 @@ TODO/Thoughts:
 
 
 
-syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) COEFFthreshold(real 0) JOintp(real 0.5) GENerate(name) seed(real 37) details REPlace AGGregate(string)]
+syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) COEFFthreshold(real 0) JOintp(real 0.5) GENerate(name) seed(real 37) REPlace AGGregate(string) details]
 
 qui: marksample touse // Exclude observations that do not meet the IF or IN criteria (if specified).
 

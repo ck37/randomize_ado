@@ -21,7 +21,9 @@
 {opt {ul on}maxr{ul off}uns:(num)}
 {opt jointp(real)}
 {opt seed:(num)}
-{opt replace}]
+{opt replace}
+{opt {ul on}agg{ul off}regate}
+{opt details}]
 
 {marker desc}{title:Description}
 
@@ -52,6 +54,10 @@ per cluster. The randomization algorithm can then be run on that dataset, and th
 {pstd} {opt seed(integer)} - the random number generator seed to use, which ensures the randomization is deterministically repeatable. As usual, the seed (and sortseed) can also simply be set outside of the module per general Stata practice. {p_end}
 
 {pstd} {opt replace} - overwrite the assignment variable if it already exists in the dataset. The script will generate an error if the assignment variable already exists and replace is not specified. {p_end}
+
+{pstd} {opt {ul on}agg{ul off}regate} - provide a list of numbers denoting how the resulting assignments should be aggregated into larger groups. This allows for unequal allocation sizes while still checking balance on equally sized groups.
+
+{pstd} {opt details} - show the detailed results for each randomization attempt, which are hidden by default.
 
 {marker ex}{title:Examples}
 
