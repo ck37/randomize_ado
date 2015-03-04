@@ -1,5 +1,8 @@
 v 3
 d randomize random assignment with blocking, balance, and automated rerandomization.
-d Chris J. Kennedy, UC Berkeley. Christopher B. Mann, Louisiana State University.
+d Chris J. Kennedy, University of California, Berkeley.
+d Christopher B. Mann, Louisiana State University.
+d
+d Support: email ck37 at berkeley dot edu
 f randomize.ado
 f randomize.sthlp
