@@ -8,10 +8,10 @@ Installation
 
 *Manual version*
 
-Download the .ado & .shlp files and put them in a directory, such as "~/Documents/randomize/". Then add that folder to Stata's search path for ado files:
+Download the zip file of the repository ([link](https://github.com/ck37/randomize.ado/archive/master.zip)), unzip it, then add that folder to Stata's search path for ado files:
 
   ```stata
-  . adopath + "~/Documents/randomize/"
+  . adopath + "~/Documents/randomize.ado-master/"
   ```
 
 You will then be able to run the command and view the help files within Stata.
