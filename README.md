@@ -6,12 +6,20 @@ Stata module for random assignment, including blocking, balance checking, and au
 Installation
 --------
 
-*Manual version*
+*Net install version*
 
-Download the zip file of the repository ([link](https://github.com/ck37/randomize.ado/archive/master.zip)), unzip it, then add that folder to Stata's search path for ado files. Example:
+Stata 13 can install directly from github. If using Stata 12 this method may not work due to the "https".
 
   ```stata
-  . adopath + "~/Documents/randomize.ado-master/"
+  net install randomize, from(https://raw.githubusercontent.com/ck37/randomize_ado/master/)
+  ``
+
+*Manual version*
+
+Download the zip file of the repository ([link](https://github.com/ck37/randomize_ado/archive/master.zip)), unzip it, then add that folder to Stata's search path for ado files. Example:
+
+  ```stata
+  . adopath + "~/Documents/randomize_ado-master/"
   ```
 
 You will then be able to run the command and view the help file within Stata.
@@ -22,7 +30,7 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
 
   ```stata
   . ssc install git
-  . git install http://github.com/ck37/randomize.ado
+  . git install http://github.com/ck37/randomize_ado
   ```
 
 
