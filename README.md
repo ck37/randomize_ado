@@ -53,7 +53,7 @@ Examples
   quiet randomize, balance(state) minruns(1000)
   ```
 
-7. Use the details option show all randomization output.
+7. Use the details option to show all randomization output.
 
   ```stata
   randomize, balance(state) minruns(1000) details
