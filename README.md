@@ -6,7 +6,7 @@ Stata module for random assignment, including blocking, balance checking, and au
 Installation
 --------
 
-Download the .ado and .shlp files, putting them in a directory, like ~/Documents/randomize/. Then add that folder to Stata's search path for ado files: adopath + "~/Documents/randomize/". You will then be able to run the command and view the help files within Stata.
+Download the .ado & .shlp files and put them in a directory, such as ~/Documents/randomize/. Then add that folder to Stata's search path for ado files: adopath + "~/Documents/randomize/". You will then be able to run the command and view the help files within Stata.
 
 Examples
 --------
