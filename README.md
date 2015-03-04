@@ -40,27 +40,27 @@ Examples
   ```stata
   randomize, groups(10) aggregate(1 2 7)
   ```  
-  
-6. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
 
-  ```stata
-  <To be added>
-  ```
-
-7. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
-
-  ```stata
-  <To be added>
-  ```
-
-8. Quiet randomization - use the quiet prefix to hide all randomization output.
+6. Quiet randomization - use the quiet prefix to hide all randomization output.
 
   ```stata
   qui randomize, balance(state) minruns(1000)
   ```
 
-9. Detailed randomization - use the details option show all randomization output.
+7. Detailed randomization - use the details option show all randomization output.
 
   ```stata
   randomize, balance(state) minruns(1000) details
+  ```
+
+8. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
+
+  ```stata
+  <To be added>
+  ```
+
+9. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
+
+  ```stata
+  <To be added>
   ```
