@@ -8,7 +8,7 @@ Installation
 
 *Manual version*
 
-Download the zip file of the repository ([link](https://github.com/ck37/randomize.ado/archive/master.zip)), unzip it, then add that folder to Stata's search path for ado files:
+Download the zip file of the repository ([link](https://github.com/ck37/randomize.ado/archive/master.zip)), unzip it, then add that folder to Stata's search path for ado files. Example:
 
   ```stata
   . adopath + "~/Documents/randomize.ado-master/"
