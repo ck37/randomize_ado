@@ -1,0 +1,3 @@
+v 1
+d Chris J. Kennedy, UC Berkeley. Christopher B. Mann, Louisiana State University.
+p randomize random assignment with blocking, balance, and automated rerandomization.
