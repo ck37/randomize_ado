@@ -8,7 +8,7 @@ Installation
 
 *Manual version*
 
-Download the .ado & .shlp files and put them in a directory, such as ~/Documents/randomize/. Then add that folder to Stata's search path for ado files:
+Download the .ado & .shlp files and put them in a directory, such as "~/Documents/randomize/". Then add that folder to Stata's search path for ado files:
 
   ```stata
   . adopath + "~/Documents/randomize/"
