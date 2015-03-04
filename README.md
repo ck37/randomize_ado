@@ -9,7 +9,7 @@ Stata module for random assignment, including blocking, balance checking, and au
 Stata 13 can install directly from github. If using Stata 12 this method may not work due to the "https".
 
   ```stata
-  net install randomize, from(https://raw.githubusercontent.com/ck37/randomize_ado/master/)
+  . net install randomize, from(https://raw.githubusercontent.com/ck37/randomize_ado/master/)
   ```
 
 ### Manual version
