@@ -105,7 +105,9 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
   bysort cluster_id: egen assignment = mode(_assignment)
   ```
 
-10. Clustered Randomization v2 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
+Of course, one could skip the last step and treat a random unit per cluster in order to measure spillover effects within treatment clusters.
+
+10. Clustered Randomization v2 - compress the dataset to the cluster level, conduct the randomization, then merge the assignment back to the full dataset.
 
   ```stata
   * Create a combined cluster id
