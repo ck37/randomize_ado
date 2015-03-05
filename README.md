@@ -87,3 +87,14 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
   ```stata
   <To be added>
   ```
+
+10. Simulated dataset example.
+
+  ```stata
+  clear
+  set obs 500
+  set seed 1
+  gen covariate = uniform()
+  gen block_var = ceil(uniform() * 4)
+  randomize, block(block_var) balance(covariate) minruns(500)
+  ```
