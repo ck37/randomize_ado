@@ -1,33 +1,38 @@
-randomize.ado
-=============
+## Description
 
 Stata module for random assignment, including blocking, balance checking, and automated rerandomization.
 
-Installation
---------
+## Installation
 
-*Manual version*
+### Net install (Recommended)
 
-Download the .ado & .shlp files and put them in a directory, such as "~/Documents/randomize/". Then add that folder to Stata's search path for ado files:
+Stata 13 can install directly from github. If using Stata 12 this method may not work due to the "https".
 
   ```stata
-  . adopath + "~/Documents/randomize/"
+  . net install randomize, from(https://raw.githubusercontent.com/ck37/randomize_ado/master/)
   ```
 
-You will then be able to run the command and view the help files within Stata.
+### Manual install
 
-*Git version*
+Download the zip file of the repository ([link](https://github.com/ck37/randomize_ado/archive/master.zip)), unzip it, then add that folder to Stata's search path for ado files. Example:
 
-Install the [stata-git package](https://github.com/coderigo/stata-git), then use that to install randomize.ado directly from github.com. This requires that your system have "git" available via the command line.
+  ```stata
+  . adopath + "~/Documents/randomize_ado-master/"
+  ```
+
+You will then be able to run the command and view the help file within Stata.
+
+### Git install
+
+Install the [stata-git package](https://github.com/coderigo/stata-git), then use that to install randomize.ado directly from github.com. This requires that your system have [git](http://git-scm.com/) available via the command line.
 
   ```stata
   . ssc install git
-  . git install http://github.com/ck37/randomize.ado
+  . git install http://github.com/ck37/randomize_ado
   ```
 
 
-Examples
---------
+## Examples
 
 1. Randomize a dataset into 2 groups, checking for balance by gender.
 
