@@ -3,11 +3,11 @@ program define randomize
 version 12.0
 
 /*
-* 
-* Stata version 12 is required due to the p-value matrix on regression results, but CM has a code fix to support version 11.
 *
 *!Author: Chris J. Kennedy, Christopher B. Mann
 *!Date: 2015-03-05
+*
+* Note: Stata version 12 is required due to the p-value matrix on regression results, but CM has a code fix to support version 11 if needed.
 */
 
 /*
@@ -19,14 +19,9 @@ Future potential options:
 - saveseed(varname) if blocking is used, save the randomization seed used within each strata for QC purposes.
 
 TODO/Thoughts:
-- Use of "if `touse'" needs to be reviewed & tested, as there may be some edge cases that should be fixed.
-- Blocking code still needs to be formally tested.
-- Should sortseed also be a parameter so that it is defaulted?
-- Do we want the result to also be randomly ordered, or not? Presume yes - useful when a voter contact program does not run through all records (e.g. phones).
-- Would we want to save the probability that a record is assigned to a given class across all attempted randomizations? May be useful for randomization inference.
-- This is basically bootstrapped randomization - may suggest similar parameters and output strategies. Also should look at MCMC simulation programming.
 - Create unit tests to confirm that the randomization algorithm works correctly for a variety of experimental scenarios.
 - Support cluster randomization directly within the algorithm eventually.
+- Should sortseed also be a parameter so that it is defaulted?
 - Develop an algorithm to rank how imbalanced given covariates are.
 - Give a warning if the smallest strata size appearse too small to randomize to the given number of groups (e.g. at least 20 records per randomization group as a rule of thumb, or something relative to the # of balance covariates, e.g. twice).
 
@@ -36,7 +31,8 @@ TODO/Thoughts:
 
 syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) COEFFthreshold(real 0) JOintp(real 0.5) GENerate(name) seed(real -1) REPlace AGGregate(string) details]
 
-qui: marksample touse // Exclude observations that do not meet the IF or IN criteria (if specified).
+* Exclude observations that do not meet the IF or IN criteria (if specified).
+qui: marksample touse
 
 tempname balance_vars rand_seed total hide_details default_generate gen_internal value
 
@@ -97,11 +93,9 @@ tempname size pos val rand_vals
 * Display current setup.
 *----------------------------------
 	
-* dis "Balance variables: " as result "`balance'" as text "."
 local `num_balance_vars': word count `balance'
-* dis "Number of balance variables: " as result "`num_balance_vars'" as text "."
 	
-* Renumber Strata for each data subset
+* Renumber strata for each data subset.
 if "`block'" != "" {
 	egen `strata_current' = group(`block') if `touse', label missing
 	dis "Strata breakdown:"
@@ -119,23 +113,20 @@ else {
 * Automated re-randomization until the balance regression passes criteria
 *-------------------------------------------------------------------------- 
 
-* Setup basic variables.
-* This saves the original order of the dataset, which can also be restored at the end of the program.
+* This saves the original order of the dataset, which is also restored at the end of the program.
 gen `standard_order' = _n 
 * Use double so that we have a lower incidence of ties.
 qui gen double `rand_assign_current' = .
 bysort `strata_current': gen `strata_cnt' = _n
 	
-* Stratified randomization with optimization in each strata.
-* This loop will run once if we are not blocking on anything.
-
 * Set seed if defined.
 if "`seed'" != "-1" {
 	set seed ``rand_seed''
 }
 
+* Blocked randomization with optimization in each strata.
+* This loop will simply run once if we are not blocking on anything.
 forvalues `strata_num' = 1/``num_strata'' {
-    * TODO: determine if this next line should be commented out? may be a bug.
 	qui sum `strata_cnt' if `strata_current' == ``strata_num''
 	local `strata_size' = r(max)
 	if "`block'" == "" {
@@ -146,13 +137,13 @@ forvalues `strata_num' = 1/``num_strata'' {
 		dis "Randomizing stratum ``strata_num'' with ``strata_size'' records."
 	}
 	
-	* Indicators for re-randomization procedure
+	* Tracking variations for the rerandomization procedure.
 	local `tries' = 0
 	local `min' = 0
 	local `best_run' = -1
 	local `best_joint_p' = -1
 
-	**** TODO: need to let people pass in a list of seeds once we have identified the best seed for each stratum.
+	**** Possible feature: could let people pass in a list of seeds once we have identified the best seed for each stratum, so that rerandomization is no longer necessary.
 		
 	while ``tries'' < `minruns' | (``tries'' < `maxruns' & (``min'' < `coeffthreshold' | ``best_joint_p'' < `jointp')) {
 			
@@ -161,20 +152,16 @@ forvalues `strata_num' = 1/``num_strata'' {
 		timer on 37
 			
 		local ++`tries'
-		*--------------
-		* Randomize
-		*--------------
+
 		* Save the starting seed so that we can re-run this randomization if it is the best.
 		local `starting_seed' = c(seed)
 			
-		* Sort these records deterministically.
+		* Sort by a deterministic order so that we have no dependence on prior randomizations or strata.
 		sort `standard_order'
 			
 		qui replace `rand_assign_current' = runiform() if `touse'
 		* Sort each strata in random order and calculate size of each strata
 		qui bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
-		* Loop through the groups and assign a proportional allocation to each.
-		* NOTE: may be able to simplify using seq(), although this may result in group 1 getting slightly more cases in which case it isn't worth it - TBD.
 
 		* Create a sequence of possible assignment values.
 		local `rand_vals' = ""
@@ -182,6 +169,10 @@ forvalues `strata_num' = 1/``num_strata'' {
 			 * Append to the list
 			local `rand_vals': list `rand_vals' | seq
 		}
+		
+		* Loop through the groups and assign a proportional allocation to each.
+		* During assignment we create a random permutation of group orderings so that the groups have equal chance of receiving an extra unit due to rounding.
+		* TODO: See if we can convert this to use seq(), per JohnT's suggestion.
 		forvalues `rand_group' = `groups'(-1)1 {
 			* Find current size of the possible random assignments.
 			local `size': list sizeof `rand_vals'
@@ -189,49 +180,28 @@ forvalues `strata_num' = 1/``num_strata'' {
 			local `pos' = floor((``size'')*runiform()+1)
 			* Extract the assignment value at that location.
 			local `val': word ``pos'' of ``rand_vals''
-			* dis "rand_vals: ``rand_vals'', size: ``size'', val: ``val'', pos: ``pos''"
 			* Remove that value from the list of possible assignments so that we sample without replacement.
 			local `rand_vals': list `rand_vals' - `val'
-			* dis "replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'"
+			
+			* Assign a portion of the stratum to the randomly chosen assignment value.
 			qui replace `generate' = ``val'' if `strata_cnt' <= ceil(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
 		}
 	
-		*----------------------------------
-		* Multinomial logit balance check.
-		*----------------------------------
 		* Use "noommitted" option so that omitted collinnear terms are not examined in p-value check.
 		* This is not strictly necessary, but is cleaner.
 		
-		* Note: we may want to examine n-1 potential bases for a 3+ group assignment in the future, for the minimum coefficient p-value statistic.
-		``hide_details'' mlogit `generate' ``balance_vars'' if `strata_current' == ``strata_num'', base(1) noomitted
+		* Old balance check: run a multinomial logistic regression.
+		* ``hide_details'' mlogit `generate' ``balance_vars'' if `strata_current' == ``strata_num'', base(1) noomitted
 		
 		* manova `balance_vars' = `generate' if `strata_current' == `strata_num'
-* 		return list
-
+		
+		* Do a multivariate comparison of means for the balance check, extracting the Wilk's lambda p-value.
 		``hide_details'' mvtest means ``balance_vars'' if `strata_current' == ``strata_num'', by(`generate')
 		matrix `p' = r(stat_m)
 		* Extract the Wilks' lambda.
 		local `joint_p' = `p'[1, 5]
 		* Set this just to keep the current algorithm working.
 		local `temp_min' = 0
-/*
-		*** TODO: rename this joint_p to not be as similar to the program parameter.
-		local joint_p = e(p)
-		* Create p-value matrix for each variable
-		matrix results = r(table)
-		matrix pvalues = results["pvalue", 1...]			
-		local num_columns = colsof(pvalues)
-		local temp_min = 1
-		forvalues i = 1/`num_columns' {
-			* If we aren't on the constant term...
-			if mod(`i', (`num_balance_vars' + 1)) != 0 {
-				local pvalue = pvalues[1,`i']
-				local temp_min = min(`pvalue', `temp_min') 
-				* Min() ignores p-values that are missing, such as for the base case.
-			}
-		}
-		*/
-						
 
 		* String variable to output if we updated our best attempt with this try.
 		local `used_try' = ""
@@ -270,26 +240,23 @@ forvalues `strata_num' = 1/``num_strata'' {
 	* TODO: decide if we actually want to enable this.
 	* cap replace `strata_seed' = "`best_start_seed'" if strata_current == `strata_num' 
 	
-	* Sort by a deterministic order.
+	* Sort by a deterministic order so that we have no dependence on prior randomizations or strata.
 	sort `standard_order'
 	qui replace `rand_assign_current' = runiform() if `touse'
 	* Sort each strata in random order and calculate size of each strata
 	sort `strata_current' `rand_assign_current'
 	qui bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `touse'
-
-	* Loop through the groups and assign a proportional allocation to each.
-	* TODO: generate a random permutation of group orderings so that the groups have equal chance of receiving an extra unit due to rounding.
-	* TODO: See if we can convert this to use seq(), per JohnT's suggestion.
-	/*
-	forvalues `rand_group' = `groups'(-1)1 {
-		qui replace `generate' = ``rand_group'' if `strata_cnt' <= round(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
-	}*/
-	* Create a sequence of possible assignment values
+	
+	* Create a sequence of possible assignment values.
 	local `rand_vals' = ""
-	forvalues seq = 1/`groups'{
-		 * Append to the list
+	forvalues seq = 1/`groups' {
+		 * Append to the list.
 		local `rand_vals': list `rand_vals' | seq
 	}
+	
+	* Loop through the groups and assign a proportional allocation to each.
+	* During assignment we create a random permutation of group orderings so that the groups have equal chance of receiving an extra unit due to rounding.
+	* TODO: See if we can convert this to use seq(), per JohnT's suggestion.
 	forvalues `rand_group' = `groups'(-1)1 {
 		* Find current size of the possible random assignments.
 		local `size': list sizeof `rand_vals'
@@ -297,9 +264,10 @@ forvalues `strata_num' = 1/``num_strata'' {
 		local `pos' = floor((``size'')*runiform()+1)
 		* Extract the assignment value at that location.
 		local `val': word ``pos'' of ``rand_vals''
-		* Remove that location from the list of possible assignments (so that we sample without replacement).
+		* Remove that location from the list of possible assignments so that we sample without replacement.
 		local `rand_vals': list `rand_vals' - `val'
-		* dis "replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'"
+		
+		* Assign a portion of the stratum to the randomly chosen assignment value.
 		qui replace `generate' = ``val'' if `strata_cnt' <= ceil(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
 	}
 
@@ -338,9 +306,11 @@ if "`aggregate'" != "" {
 	qui gen `temp_assignment' = .
 	local `group_start' = 1
 	local `assignment_iterator' = 1
+	
 	* Loop over each value of aggregate and merge the assignment groups.
 	foreach `value' in `aggregate' {
 		qui replace `temp_assignment' = ``assignment_iterator'' if `generate' >= ``group_start'' & `generate' < (``group_start'' + ``value'')
+		
 		* Iterate the aggregated assignment value.
 		local ++`assignment_iterator'
 
