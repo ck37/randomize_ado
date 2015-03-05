@@ -202,12 +202,25 @@ forvalues `strata_num' = 1/``num_strata'' {
 		* manova `balance_vars' = `generate' if `strata_current' == `strata_num'
 		
 		* Do a multivariate comparison of means for the balance check, extracting the Wilk's lambda p-value.
-		``hide_details'' mvtest means ``balance_vars'' if `strata_current' == ``strata_num'', by(`generate')
-		matrix `p' = r(stat_m)
-		* Extract the Wilks' lambda.
-		local `joint_p' = `p'[1, 5]
-		* Set this just to keep the current algorithm working.
-		local `temp_min' = 0
+		cap ``hide_details'' mvtest means ``balance_vars'' if `strata_current' == ``strata_num'', by(`generate')
+		* NOTE: in very rare cases, the manova will fail for some reason. Here we recover from the error if it occurs, discarding the randomization.
+		* The capture has the unfortunate side effect of also hiding the manova test even if details are requested, but we can live with it.
+		if _rc == 506 {
+			* Set p to 0 so that this run is discarded.
+			local `joint_p' = 0
+		}
+		else if _rc == 0 {
+			matrix `p' = r(stat_m)
+			* Extract the Wilks' lambda.
+			local `joint_p' = `p'[1, 5]
+			* Set this just to keep the current algorithm working.
+			local `temp_min' = 0
+		}
+		else {
+			dis as err "Error in the manova test."
+			* Set p to 0 so that this run is discard.
+			local `joint_p' = 0
+		}
 
 		* String variable to output if we updated our best attempt with this try.
 		local `used_try' = ""
@@ -226,10 +239,10 @@ forvalues `strata_num' = 1/``num_strata'' {
 			local `best_end_seed' = c(seed)
 			local `used_try' = "*"
 		}
-		``hide_details'' dis "Strata ``strata_num'', Try " as result %2.0f ``tries'' as text ": LR Test p-value = " as result %06.4f ``joint_p'' as text "; minimum coeff p = " as result %05.3f ``temp_min'' as text ".`used_try'" 
+		``hide_details'' dis "Strata ``strata_num'', Try " as result %2.0f ``tries'' as text ": Balance p-value = " as result %06.4f ``joint_p'' as text ".``used_try''" 
 	}
 	``hide_details'' dis "----"
-	``hide_details'' dis "Strata ``strata_num''. Tries: ``tries''. Best run: ``best_run''. LR Test p-value: " as result %06.4f round(``best_joint_p'', .0001) as text ", min coeff p-value: " as result %05.3f ``min'' as text "."
+	``hide_details'' dis "Strata ``strata_num''. Tries: ``tries''. Best run: ``best_run''. Balance p-value: " as result %06.4f round(``best_joint_p'', .0001) as text "."
 	``hide_details'' dis "Start seed: ``best_start_seed''. End seed: ``best_end_seed''."
 		
 	*------------------------------------------
