@@ -88,7 +88,7 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
   <To be added>
   ```
 
-10. Simulated dataset example.
+10. Simulated dataset example - randomizing 5,000 records across 4 blocks, and taking the best randomization out of 500 per block.
 
   ```stata
   clear
