@@ -91,10 +91,6 @@ tempvar strata_current strata_cnt rand_assign_current strata_cnt standard_order
 
 * Create temporary macro variables.
 tempname num_balance_vars strata_size strata_num tries min best_run best_joint_p best_start_seed best_end_seed best_run rand_group num_strata starting_seed p used_try joint_p temp_min
-
-* Create temporary local macros.
-* tempname ***
-
 	
 *----------------------------------
 * Display current setup.
@@ -107,14 +103,16 @@ local `num_balance_vars': word count `balance'
 * Renumber Strata for each data subset
 if "`block'" != "" {
 	egen `strata_current' = group(`block') if `touse', label missing
+	dis "Strata breakdown:"
+	tab `strata_current' if `touse'
+	local `num_strata' = r(r)
 }
 else {
 	* No blocking needed.
 	gen `strata_current' = 1 if `touse'
+	local `num_strata' = 1
 }
-dis "Strata breakdown:"
-tab `strata_current' if `touse'
-local `num_strata' = r(r)
+
 
 *-------------------------------------------------------------------------- 
 * Automated re-randomization until the balance regression passes criteria
@@ -132,8 +130,14 @@ forvalues `strata_num' = 1/``num_strata'' {
     * TODO: determine if this next line should be commented out? may be a bug.
 	qui sum `strata_cnt' if `strata_current' == ``strata_num''
 	local `strata_size' = r(max)
-	dis "Randomizing stratum ``strata_num'' with ``strata_size'' records."
-
+	if "`block'" == "" {
+		* No blocking.
+		dis "Randomizing ``strata_size'' records."
+	}
+	else {
+		dis "Randomizing stratum ``strata_num'' with ``strata_size'' records."
+	}
+	
 	* Indicators for re-randomization procedure
 	local `tries' = 0
 	local `min' = 0
@@ -264,10 +268,20 @@ forvalues `strata_num' = 1/``num_strata'' {
 	assert(c(seed) == "``best_end_seed''")
 		
 	* Look at the results for this strata.
-	dis as text _n "Assignment results for block ``strata_num'':"
+	if "`block'" != "" {
+		dis as text _n "Assignment results for block ``strata_num'':"
+	}
+	else {
+		dis as text _n "Assignment results:"
+	}
 	tab `generate' if `strata_current' == ``strata_num'', missing
-		
-	dis as text _n "Review balance within block ``strata_num'':"
+
+	if "`block'" != "" {
+		dis as text _n "Review balance within block ``strata_num'':"
+	}
+	else {
+		dis as text _n "Review balance:"
+	}
 	mlogit `generate' ``balance_vars'' if `strata_current' == ``strata_num'', base(1) noomitted nolog
 			
 }
