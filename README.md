@@ -92,7 +92,7 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
 
   ```stata
   clear
-  set obs 500
+  set obs 5000
   set seed 1
   gen covariate = uniform()
   gen block_var = ceil(uniform() * 4)
