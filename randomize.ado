@@ -91,6 +91,7 @@ tempvar strata_current strata_cnt rand_assign_current strata_cnt standard_order
 
 * Create temporary macro variables.
 tempname num_balance_vars strata_size strata_num tries min best_run best_joint_p best_start_seed best_end_seed best_run rand_group num_strata starting_seed p used_try joint_p temp_min
+tempname size pos val rand_vals
 	
 *----------------------------------
 * Display current setup.
@@ -126,6 +127,10 @@ bysort `strata_current': gen `strata_cnt' = _n
 	
 * Stratified randomization with optimization in each strata.
 * This loop will run once if we are not blocking on anything.
+
+* Set seed.
+set seed ``rand_seed''
+
 forvalues `strata_num' = 1/``num_strata'' {
     * TODO: determine if this next line should be commented out? may be a bug.
 	qui sum `strata_cnt' if `strata_current' == ``strata_num''
@@ -144,8 +149,6 @@ forvalues `strata_num' = 1/``num_strata'' {
 	local `best_run' = -1
 	local `best_joint_p' = -1
 
-	* Set seed.
-	set seed ``rand_seed''
 	**** TODO: need to let people pass in a list of seeds once we have identified the best seed for each stratum.
 		
 	while ``tries'' < `minruns' | (``tries'' < `maxruns' & (``min'' < `coeffthreshold' | ``best_joint_p'' < `jointp')) {
@@ -169,9 +172,25 @@ forvalues `strata_num' = 1/``num_strata'' {
 		qui bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
 		* Loop through the groups and assign a proportional allocation to each.
 		* NOTE: may be able to simplify using seq(), although this may result in group 1 getting slightly more cases in which case it isn't worth it - TBD.
+
+		* Create a sequence of possible assignment values.
+		local `rand_vals' = ""
+		forvalues seq = 1/`groups'{
+			 * Append to the list
+			local `rand_vals': list `rand_vals' | seq
+		}
 		forvalues `rand_group' = `groups'(-1)1 {
+			* Find current size of the possible random assignments.
+			local `size': list sizeof `rand_vals'
+			* Choose a random position (integer) in the list of random assignments.
+			local `pos' = floor((``size'')*runiform()+1)
+			* Extract the assignment value at that location.
+			local `val': word ``pos'' of ``rand_vals''
+			* dis "rand_vals: ``rand_vals'', size: ``size'', val: ``val'', pos: ``pos''"
+			* Remove that value from the list of possible assignments so that we sample without replacement.
+			local `rand_vals': list `rand_vals' - `val'
 			* dis "replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'"
-			qui replace `generate' = ``rand_group'' if `strata_cnt' <= round(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
+			qui replace `generate' = ``val'' if `strata_cnt' <= ceil(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
 		}
 	
 		*----------------------------------
@@ -258,8 +277,27 @@ forvalues `strata_num' = 1/``num_strata'' {
 	* Loop through the groups and assign a proportional allocation to each.
 	* TODO: generate a random permutation of group orderings so that the groups have equal chance of receiving an extra unit due to rounding.
 	* TODO: See if we can convert this to use seq(), per JohnT's suggestion.
+	/*
 	forvalues `rand_group' = `groups'(-1)1 {
 		qui replace `generate' = ``rand_group'' if `strata_cnt' <= round(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
+	}*/
+	* Create a sequence of possible assignment values
+	local `rand_vals' = ""
+	forvalues seq = 1/`groups'{
+		 * Append to the list
+		local `rand_vals': list `rand_vals' | seq
+	}
+	forvalues `rand_group' = `groups'(-1)1 {
+		* Find current size of the possible random assignments.
+		local `size': list sizeof `rand_vals'
+		* Choose a random position in the list of random assignments.
+		local `pos' = floor((``size'')*runiform()+1)
+		* Extract the assignment value at that location.
+		local `val': word ``pos'' of ``rand_vals''
+		* Remove that location from the list of possible assignments (so that we sample without replacement).
+		local `rand_vals': list `rand_vals' - `val'
+		* dis "replace `generate' = `rand_group' if `strata_cnt' <= round(`strata_size' * `rand_group' / `groups') & `strata_current' == `strata_num'"
+		qui replace `generate' = ``val'' if `strata_cnt' <= ceil(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
 	}
 
 	``hide_details'' dis "Ended at seed: " as result c(seed)
