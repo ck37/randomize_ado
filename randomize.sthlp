@@ -90,4 +90,4 @@ This allows for unequal allocation sizes while still checking balance on equally
 
 {title:Acknowledgements}
 
-{phang} Thank you to Debby Kermer for earlier contributions to parts of the algorithm, and to John Ternovski for helpful comments.
+{phang} Thank you to Debby Kermer for earlier contributions to parts of the algorithm, to John Ternovski for helpful comments, and to Kari Lock Morgan for the underlying theory and suggestion of the Wilks lambda balance statistic.
