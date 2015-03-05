@@ -83,7 +83,7 @@ if "`aggregate'" != "" {
 qui gen `generate' = . if `touse'
 
 * Create temporary dataset variables.
-tempvar strata_current strata_cnt rand_assign_current strata_cnt standard_order
+tempvar strata_current strata_cnt rand_assign_current rand_assign_current2 strata_cnt standard_order
 
 * Create temporary macro variables.
 tempname num_balance_vars strata_size strata_num tries min best_run best_joint_p best_start_seed best_end_seed best_run rand_group num_strata starting_seed p used_try joint_p temp_min
@@ -117,6 +117,9 @@ else {
 gen `standard_order' = _n 
 * Use double so that we have a lower incidence of ties.
 qui gen double `rand_assign_current' = .
+* Create a second variable to further reduce the incidence of ties.
+qui gen double `rand_assign_current2' = .
+
 bysort `strata_current': gen `strata_cnt' = _n
 	
 * Set seed if defined.
@@ -158,10 +161,13 @@ forvalues `strata_num' = 1/``num_strata'' {
 			
 		* Sort by a deterministic order so that we have no dependence on prior randomizations or strata.
 		sort `standard_order'
-			
+		
+		* Generate first random number.
 		qui replace `rand_assign_current' = runiform() if `touse'
-		* Sort each strata in random order and calculate size of each strata
-		qui bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
+		* Generate second random number.
+		qui replace `rand_assign_current2' = runiform() if `touse'
+		* Sort each strata in random order and calculate size of each strata. Sort on two doubles to minimize chance of ties.
+		qui bysort `strata_current' (`rand_assign_current' `rand_assign_current2'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
 
 		* Create a sequence of possible assignment values.
 		local `rand_vals' = ""
@@ -242,10 +248,13 @@ forvalues `strata_num' = 1/``num_strata'' {
 	
 	* Sort by a deterministic order so that we have no dependence on prior randomizations or strata.
 	sort `standard_order'
+	
+	* Generate first random number.
 	qui replace `rand_assign_current' = runiform() if `touse'
-	* Sort each strata in random order and calculate size of each strata
-	sort `strata_current' `rand_assign_current'
-	qui bysort `strata_current' (`rand_assign_current'): replace `strata_cnt' = _n if `touse'
+	* Generate second random number.
+	qui replace `rand_assign_current2' = runiform() if `touse'
+	* Sort each strata in random order and calculate size of each strata. Sort on two doubles to minimize chance of ties.
+	qui bysort `strata_current' (`rand_assign_current' `rand_assign_current2'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
 	
 	* Create a sequence of possible assignment values.
 	local `rand_vals' = ""
