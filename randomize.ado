@@ -38,7 +38,7 @@ syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALa
 
 qui: marksample touse // Exclude observations that do not meet the IF or IN criteria (if specified).
 
-tempname balance_vars rand_seed total hide_details default_generate gen_internal
+tempname balance_vars rand_seed total hide_details default_generate gen_internal value
 
 loc `default_generate' = "_assignment"
 
@@ -74,8 +74,8 @@ if "`details'" != "" {
 * Audit the aggregate values if that option is being used.
 if "`aggregate'" != "" {
 	local `total' = 0
-	foreach value in `aggregate' {
-		local `total' = ``total'' + `value'
+	foreach `value' in `aggregate' {
+		local `total' = ``total'' + ``value''
 	}
 	if ``total'' != `groups' {
 		dis as err "Error: aggregation values do not sum to the total number of groups. Please correct the aggregation values."
@@ -284,13 +284,13 @@ if "`aggregate'" != "" {
 	local `group_start' = 1
 	local `assignment_iterator' = 1
 	* Loop over each value of aggregate and merge the assignment groups.
-	foreach value in `aggregate' {
-		qui replace `temp_assignment' = `assignment_iterator' if `generate' >= `group_start' & `generate' < (`group_start' + `value')
+	foreach `value' in `aggregate' {
+		qui replace `temp_assignment' = ``assignment_iterator'' if `generate' >= ``group_start'' & `generate' < (``group_start'' + ``value'')
 		* Iterate the aggregated assignment value.
 		local ++`assignment_iterator'
 
 		* Move up the assignment values we are working with, so that the next iteration will process that set of assignments.
-		local `group_start' = `group_start' + `value'
+		local `group_start' = ``group_start'' + ``value''
 	}
 
 	* Now move those aggregated assignments back into the main assignment variable.
