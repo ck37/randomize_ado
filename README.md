@@ -87,3 +87,14 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
   ```stata
   <To be added>
   ```
+
+10. Simulated dataset example - randomize 5,000 records across 4 blocks, and take the best randomization out of 500 per block.
+
+  ```stata
+  clear
+  set obs 5000
+  set seed 1
+  gen covariate = uniform()
+  gen block_var = ceil(uniform() * 4)
+  randomize, block(block_var) balance(covariate) minruns(500)
+  ```
