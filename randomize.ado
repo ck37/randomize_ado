@@ -122,7 +122,8 @@ else {
 * Setup basic variables.
 * This saves the original order of the dataset, which can also be restored at the end of the program.
 gen `standard_order' = _n 
-qui gen `rand_assign_current' = .
+* Use double so that we have a lower incidence of ties.
+qui gen double `rand_assign_current' = .
 bysort `strata_current': gen `strata_cnt' = _n
 	
 * Stratified randomization with optimization in each strata.
