@@ -106,5 +106,20 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
 10. Clustered Randomization v2 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
 
   ```stata
-  <To be added>
+  * Create a combined cluster id
+  egen cluster_id = group(cluster_field1 cluster_field2)
+  set seed 1
+  set sortseed 2
+  * Save the uncompressed version of the dataset.
+  preserve
+  * Aggregate to the cluster level, creating summary statistics for the randomization.
+  collapse (mean) covar1 covar2 (max) rare_covar3 (count) cluster_size, by(cluster_id)
+  * Execute the randomization at the cluster level.
+  randomize, balance(covar1 covar2 rare_covar3) replace
+  * Restrict to the data that we need.
+  keep cluster_id _assignment
+  save "cluster-assignments.dta", replace
+  * Switch back to the full dataset.
+  restore
+  merge m:1 cluster_id using "cluster-assignments.data"
   ```
