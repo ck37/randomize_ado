@@ -34,7 +34,7 @@ TODO/Thoughts:
 
 
 
-syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) COEFFthreshold(real 0) JOintp(real 0.5) GENerate(name) seed(real 37) REPlace AGGregate(string) details]
+syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) COEFFthreshold(real 0) JOintp(real 0.5) GENerate(name) seed(real -1) REPlace AGGregate(string) details]
 
 qui: marksample touse // Exclude observations that do not meet the IF or IN criteria (if specified).
 
@@ -128,8 +128,10 @@ bysort `strata_current': gen `strata_cnt' = _n
 * Stratified randomization with optimization in each strata.
 * This loop will run once if we are not blocking on anything.
 
-* Set seed.
-set seed ``rand_seed''
+* Set seed if defined.
+if "`seed'" != "-1" {
+	set seed ``rand_seed''
+}
 
 forvalues `strata_num' = 1/``num_strata'' {
     * TODO: determine if this next line should be commented out? may be a bug.
