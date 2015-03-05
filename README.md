@@ -75,20 +75,8 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
   ```stata
   . randomize, balance(state) minruns(1000) details
   ```
-
-8. Clustered Randomization v1 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
-
-  ```stata
-  <To be added>
-  ```
-
-9. Clustered Randomization v2 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
-
-  ```stata
-  <To be added>
-  ```
-
-10. Simulated dataset example - randomize 10,000 records across 4 blocks, and take the best randomization out of 500 per block.
+  
+8. Simulated dataset example - randomize 10,000 records across 4 blocks, and take the best randomization out of 500 per block.
 
   ```stata
   clear
@@ -97,4 +85,26 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
   gen covariate = uniform()
   gen block_var = ceil(uniform() * 4)
   randomize, block(block_var) balance(covariate) minruns(500)
+  ```
+
+9. Clustered Randomization v1 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
+
+  ```stata
+  * Create a combined cluster id
+  egen cluster_id = group(cluster_field1 cluster_field2)
+  set seed 1
+  set sortseed 2
+  gen double random = runiform()
+  * Randomly order individuals within clusters.
+  bysort cluster_id (random): egen cluster_seq = seq()
+  * Randomize using the demographics of the first cluster member to check for balance.
+  randomize if cluster_seq == 1, balance(covar1 covar2) block(blockvar1 blockvar2) replace
+  * Expand assignment to all units in the cluster.
+  bysort cluster_id: egen assignment = mode(_assignment)
+  ```
+
+10. Clustered Randomization v2 - compress the dataset to the cluster level, conduct the randomization, then move assignment back to the full dataset.
+
+  ```stata
+  <To be added>
   ```
