@@ -93,7 +93,7 @@ Install the [stata-git package](https://github.com/coderigo/stata-git), then use
   ```stata
   clear
   set obs 10000
-  set seed 1
+  set seed 2
   gen covariate = uniform()
   gen block_var = ceil(uniform() * 4)
   randomize, block(block_var) balance(covariate) minruns(500)
