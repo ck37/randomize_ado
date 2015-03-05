@@ -78,6 +78,8 @@ This allows for unequal allocation sizes while still checking balance on equally
 
 {phang}Lock Morgan, K. and Rubin, D. B. (2012). Rerandomization to improve covariate balance in experiments. Ann. Statist. Volume 40, Number 2, 1263-1282.{p_end}
 
+{phang}Lock Morgan, K. (2011). Rerandomization to improve covariate balance in randomized experiments. PhD dissertation. Harvard University, Department of Statistics.{p_end}
+
 {title:Author}
 
 {pstd}Chris J. Kennedy{p_end}
