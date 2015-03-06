@@ -23,13 +23,16 @@ TODO/Thoughts:
 - Support cluster randomization directly within the algorithm eventually.
 - Should sortseed also be a parameter so that it is defaulted?
 - Develop an algorithm to rank how imbalanced given covariates are.
+- Provide covariate balance plots.
+- Automatically coarsen continuous covariates if used as blocks.
+- Check for balance on additional moments and interactions of covariates.
 - Give a warning if the smallest strata size appearse too small to randomize to the given number of groups (e.g. at least 20 records per randomization group as a rule of thumb, or something relative to the # of balance covariates, e.g. twice).
 
 ====================================*/
 
 
 
-syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) COEFFthreshold(real 0) JOintp(real 0) GENerate(name) seed(real -1) REPlace AGGregate(string) details]
+syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) JOintp(real 0) GENerate(name) seed(real -1) REPlace AGGregate(string) details]
 
 * Exclude observations that do not meet the IF or IN criteria (if specified).
 qui: marksample touse
