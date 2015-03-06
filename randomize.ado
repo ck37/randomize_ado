@@ -79,8 +79,8 @@ if "`aggregate'" != "" {
 	}
 }
 
-* Create the assignment variable.
-qui gen `generate' = . if `touse'
+* Create the assignment variable. Start with a byte to conserve space; Stata will automatically promote to a larger number if the # of groups is large.
+qui gen byte `generate' = . if `touse'
 
 * Create temporary dataset variables.
 tempvar strata_current strata_cnt rand_assign_current rand_assign_current2 strata_cnt standard_order
