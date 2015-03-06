@@ -147,8 +147,8 @@ forvalues `strata_num' = 1/``num_strata'' {
 	local `best_joint_p' = -1
 
 	**** Possible feature: could let people pass in a list of seeds once we have identified the best seed for each stratum, so that rerandomization is no longer necessary.
-		
-	while ``tries'' < `minruns' | (``tries'' < `maxruns' & (``min'' < `coeffthreshold' | ``best_joint_p'' < `jointp')) {
+	
+	while ``tries'' < `minruns' | (``tries'' < `maxruns' & (``best_joint_p'' < `jointp')) {
 			
 		* Update randomization count in the timer.
 		timer off 37
@@ -178,7 +178,7 @@ forvalues `strata_num' = 1/``num_strata'' {
 		
 		* Loop through the groups and assign a proportional allocation to each.
 		* During assignment we create a random permutation of group orderings so that the groups have equal chance of receiving an extra unit due to rounding.
-		* TODO: See if we can convert this to use seq(), per JohnT's suggestion.
+		* Optional todo: See if we can convert this to use seq(), per JohnT's suggestion.
 		forvalues `rand_group' = `groups'(-1)1 {
 			* Find current size of the possible random assignments.
 			local `size': list sizeof `rand_vals'
@@ -192,14 +192,6 @@ forvalues `strata_num' = 1/``num_strata'' {
 			* Assign a portion of the stratum to the randomly chosen assignment value.
 			qui replace `generate' = ``val'' if `strata_cnt' <= ceil(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
 		}
-	
-		* Use "noommitted" option so that omitted collinnear terms are not examined in p-value check.
-		* This is not strictly necessary, but is cleaner.
-		
-		* Old balance check: run a multinomial logistic regression.
-		* ``hide_details'' mlogit `generate' ``balance_vars'' if `strata_current' == ``strata_num'', base(1) noomitted
-		
-		* manova `balance_vars' = `generate' if `strata_current' == `strata_num'
 		
 		* Do a multivariate comparison of means for the balance check, extracting the Wilk's lambda p-value.
 		cap ``hide_details'' mvtest means ``balance_vars'' if `strata_current' == ``strata_num'', by(`generate')
@@ -225,15 +217,9 @@ forvalues `strata_num' = 1/``num_strata'' {
 		* String variable to output if we updated our best attempt with this try.
 		local `used_try' = ""
 		
-		* Save this randomization as the current best if at least one of three criteria are met:
-		* 1. The LR p-value threshold is exceeded, our minimum coefficient p-value threshold is exceeded, and the minimum coefficent p-value is higher than our prior best.
-		* 2. The current LR p-value is better than our previous best.
-		* 3. The current LR p-value is equal to our previous best but the minimum coefficient p-value is higher.
-		* Note: the logic for case #3 may need to be tweaked in the below algorithm.
- 		if ( (``joint_p'' >= `coeffthreshold' & ``temp_min'' >= `coeffthreshold' & ``min'' < `coeffthreshold') ///
-			| (``joint_p'' >= ``best_joint_p'' & (``temp_min'' >= `coeffthreshold' | ``min'' < `coeffthreshold' | ``best_joint_p'' < `jointp'))) {
+		* Save this randomization if the balance p-value is better than our previous best.
+ 		if (``joint_p'' > ``best_joint_p'') {
 			local `best_run' = ``tries''
-			local `min' = ``temp_min''		
 			local `best_joint_p' = ``joint_p''
 			local `best_start_seed' = "``starting_seed''"
 			local `best_end_seed' = c(seed)
