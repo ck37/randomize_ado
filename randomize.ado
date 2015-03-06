@@ -117,10 +117,10 @@ else {
 gen `standard_order' = _n 
 * Use double so that we have a lower incidence of ties.
 qui gen double `rand_assign_current' = .
-* Create a second variable to further reduce the incidence of ties.
+* Create a second variable to further reduce the incidence of ties, and minimize the need to set the sortseed for reproducibility.
 qui gen double `rand_assign_current2' = .
 
-bysort `strata_current': gen `strata_cnt' = _n
+qui gen `strata_cnt' = .
 	
 * Set seed if defined.
 if "`seed'" != "-1" {
@@ -130,8 +130,8 @@ if "`seed'" != "-1" {
 * Blocked randomization with optimization in each strata.
 * This loop will simply run once if we are not blocking on anything.
 forvalues `strata_num' = 1/``num_strata'' {
-	qui sum `strata_cnt' if `strata_current' == ``strata_num''
-	local `strata_size' = r(max)
+	qui count if `strata_current' == ``strata_num''
+	local `strata_size' = r(N)
 	if "`block'" == "" {
 		* No blocking.
 		dis "Randomizing ``strata_size'' records."
