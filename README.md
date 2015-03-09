@@ -4,6 +4,8 @@
 
 For clustered random assignment, one will need to handle the clustering manually, such as collapsing the dataset to the cluster level or choosing one representative unit per cluster. The randomization algorithm can then be run on that dataset, and the assignments can be copied to all units in the cluster. Examples are provided below.
 
+We do not yet support factor variable syntax in the balance check so categorical variables will need to be converted to a series of indicators.
+
 ## Installation
 
 ### Net install (Recommended)
