@@ -26,13 +26,14 @@ TODO/Thoughts:
 - Provide covariate balance plots.
 - Automatically coarsen continuous covariates if used as blocks.
 - Check for balance on additional moments and interactions of covariates.
+- Ensure that blocking+clustering appropriately handles blocking variables that could cross clusters.
 - Give a warning if the smallest strata size appearse too small to randomize to the given number of groups (e.g. at least 20 records per randomization group as a rule of thumb, or something relative to the # of balance covariates, e.g. twice).
 
 ====================================*/
 
 
 
-syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) JOintp(real 0) GENerate(name) seed(real -1) REPlace AGGregate(string) details]
+syntax [if] [in] [, GRoups(integer 2) MINruns(integer 1) MAXruns(integer 1) BALance(string) BLock(varlist) JOintp(real 0) GENerate(name) CLuster(varlist) seed(real -1) REPlace AGGregate(string) details]
 
 * Exclude observations that do not meet the IF or IN criteria (if specified).
 qui: marksample touse
@@ -80,6 +81,15 @@ if "`aggregate'" != "" {
 		dis as err "Error: aggregation values do not sum to the total number of groups. Please correct the aggregation values."
 		exit
 	}
+}
+
+* Handle clustering if it was specified.
+if "`cluster'" != "" {
+	tempvar cluster_id
+	* Create a cluster id based on the unique combination of cluster variables.
+	* TODO: handle continuous variables in this scenario, e.g. by using tiling and/or coarsened exact matching.
+	* TODO: ensure this works appropriately with automatic block creation.
+	egen `cluster_id' = group(`cluster')
 }
 
 * Create the assignment variable. Start with a byte to conserve space; Stata will automatically promote to a larger number if the # of groups is large.
@@ -166,11 +176,12 @@ forvalues `strata_num' = 1/``num_strata'' {
 		sort `standard_order'
 		
 		* Generate first random number.
-		qui replace `rand_assign_current' = runiform() if `touse'
+		qui replace `rand_assign_current' = runiform() if `strata_current' == ``strata_num''
 		* Generate second random number.
-		qui replace `rand_assign_current2' = runiform() if `touse'
-		* Sort each strata in random order and calculate size of each strata. Sort on two doubles to minimize chance of ties.
-		qui bysort `strata_current' (`rand_assign_current' `rand_assign_current2'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
+		qui replace `rand_assign_current2' = runiform() if `strata_current' == ``strata_num''
+		* Sort each strata in random order and calculate size of each strata. Sort on two doubles to minimize chance of ties
+		* Then follow with the standard order so that ties are broken deterministically.
+		qui bysort `strata_current' (`rand_assign_current' `rand_assign_current2' `standard_order'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
 
 		* Create a sequence of possible assignment values.
 		local `rand_vals' = ""
@@ -252,11 +263,12 @@ forvalues `strata_num' = 1/``num_strata'' {
 	sort `standard_order'
 	
 	* Generate first random number.
-	qui replace `rand_assign_current' = runiform() if `touse'
+	qui replace `rand_assign_current' = runiform() if `strata_current' == ``strata_num''
 	* Generate second random number.
-	qui replace `rand_assign_current2' = runiform() if `touse'
-	* Sort each strata in random order and calculate size of each strata. Sort on two doubles to minimize chance of ties.
-	qui bysort `strata_current' (`rand_assign_current' `rand_assign_current2'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
+	qui replace `rand_assign_current2' = runiform() if `strata_current' == ``strata_num''
+	* Sort each strata in random order and calculate size of each strata. Sort on two doubles to minimize chance of ties
+	* Then follow with the standard order so that ties are broken deterministically, even if sortseed is not specified.
+	qui bysort `strata_current' (`rand_assign_current' `rand_assign_current2' `standard_order'): replace `strata_cnt' = _n if `strata_current' == ``strata_num''
 	
 	* Create a sequence of possible assignment values.
 	local `rand_vals' = ""
