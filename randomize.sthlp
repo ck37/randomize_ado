@@ -13,17 +13,27 @@
 
 {pstd} 
 {cmd:randomize} {ifin}{cmd:, }
-[{opt {ul on}bal{ul off}ance:(varlist)}
-{opt {ul on}gr{ul off}oups:(num)}
-{opt {ul on}gen{ul off}erate:(_assignment)}
-{opt {ul on}bl{ul off}ock:(varlist)}
-{opt {ul on}minr{ul off}uns:(num)}
-{opt {ul on}maxr{ul off}uns:(num)}
-{opt jointp(real)}
-{opt seed:(num)}
-{opt replace}
-{opt {ul on}agg{ul off}regate}
-{opt details}]
+[{it:options}]
+
+{synoptset 23 tabbed}{...}
+{synopthdr}
+{synoptline}
+
+{syntab:Main}
+{synopt:{opt {ul on}bal{ul off}ance:(varlist)}} List of variables on which to test for balance. {p_end}
+{synopt:{opt {ul on}gr{ul off}oups:(#)}} Number of groups to create of equal size within the assignment variable; default is {cmd:2}. {p_end}
+{synopt:{opt {ul on}gen{ul off}erate(newvar)}} Name of the assignment variable; default is {cmd:_assignment}. {p_end}
+{synopt:{opt {ul on}bl{ul off}ock(varlist)}} List of variables to block on. These are combined into a strata variable, and randomizations are conducted within blocks. {p_end}
+{synopt:{opt {ul on}minr{ul off}uns(#)}} Minimum number of randomizations to run; default is {cmd:1}. Per-block. {p_end}
+{synopt:{opt {ul on}maxr{ul off}uns(#)}} Maximum number of randomizations to run; default is {cmd:1}. Per-block. {p_end}
+{synopt:{opt seed(integer)}} The random number generator seed to use, which ensures the randomization is replicable. Can also be set manually. {p_end}
+{synopt:{opt replace}} Overwrite existing assignment variable. {p_end}
+{synopt:{opt {ul on}agg{ul off}regate(numlist)}} Provide a list of numbers denoting how the resulting assignments should be aggregated into larger groups.
+This allows for unequal allocation sizes while still checking balance on equally sized groups. The list of numbers must sum to the number of groups.
+
+{syntab:Advanced}
+{synopt:{opt jointp(real)}} Minimum balance p-value allowable to accept a given randomization, ranging from 0 to 1. {p_end}
+{synopt:{opt details}} Show the detailed results for each randomization attempt, which are hidden by default.
 
 {marker desc}{title:Description}
 
@@ -34,34 +44,6 @@ exceeds a certain cut-off value (e.g. 0.2). If unequal allocation sizes are desi
 
 {pstd} For clustered random assignment, one will need to handle the clustering manually, such as collapsing the dataset to the cluster level or choosing one representative unit
 per cluster. The randomization algorithm can then be run on that dataset, and the assignments can be copied to all units in the cluster.
-
-{marker desc}{title:Options}
-
-{pstd} {opt {ul on}bal{ul off}ance:(varlist)} - list of variables on which to test for balance. {p_end}
-
-{pstd} {opt {ul on}gr{ul off}oups:(integer)} - number of groups to create of equal size within the assignment variable, default to 2. {p_end}
-
-{pstd} {opt {ul on}gen{ul off}erate(newvar)} - name of the assignment variable, defaulting to _assignment. {p_end}
-
-{pstd} {opt {ul on}bl{ul off}ock(varlist)} - list of variables to block on. These are combined into a strata variable, and randomizations are conducted within blocks. {p_end}
-
-{pstd} {opt {ul on}minr{ul off}uns(num)} - minimum number of randomizations to run, default to 1. If blocks are specified this parameter will be per-block. {p_end}
-
-{pstd} {opt {ul on}maxr{ul off}uns(num)} - maximum number of randomizations to run, default to 1. If blocks are specified this parameter will be per-block. {p_end}
-
-{pstd} {opt jointp(real)} - minimum joint p-value allowable to accept a given randomization, ranging from 0 to 1.
-This p-value comes from a likelihood ratio test on a multinomial logit. {p_end}
-
-{pstd} {opt seed(integer)} - the random number generator seed to use, which ensures the randomization is deterministically repeatable.
-As usual, the seed (and sortseed) can also simply be set outside of the module per general Stata practice. {p_end}
-
-{pstd} {opt replace} - overwrite the assignment variable if it already exists in the dataset.
-The script will generate an error if the assignment variable already exists and replace is not specified. {p_end}
-
-{pstd} {opt {ul on}agg{ul off}regate} - provide a list of numbers denoting how the resulting assignments should be aggregated into larger groups.
-This allows for unequal allocation sizes while still checking balance on equally sized groups. The list of numbers must sum to the number of groups.
-
-{pstd} {opt details} - show the detailed results for each randomization attempt, which are hidden by default.
 
 {marker ex}{title:Examples}
 
@@ -76,19 +58,25 @@ This allows for unequal allocation sizes while still checking balance on equally
 
 {title:References}
 
-{phang}Lock Morgan, K. and Rubin, D. B. (2012). Rerandomization to improve covariate balance in experiments. Ann. Statist. Volume 40, Number 2, 1263-1282.{p_end}
+{phang}
+Lock Morgan, K. and Rubin, D. B. (2012). Rerandomization to improve covariate balance in experiments. Ann. Statist. Volume 40, Number 2, 1263-1282.
+{p_end}
 
-{phang}Lock Morgan, K. (2011). Rerandomization to improve covariate balance in randomized experiments. PhD dissertation. Harvard University, Department of Statistics.{p_end}
+{phang}
+Lock Morgan, K. (2011). Rerandomization to improve covariate balance in randomized experiments. PhD dissertation. Harvard University, Department of Statistics.
+{p_end}
 
-{title:Author}
+{title:Authors}
 
 {pstd}Chris J. Kennedy{p_end}
 {pstd}University of California, Berkeley{p_end}
 {pstd}{browse "mailto:ck37@berkeley.edu":ck37@berkeley.edu}{p_end}
+{pstd}{browse "http://ck37.com":http://ck37.com}{p_end}
 
 {pstd}Christopher B. Mann{p_end}
 {pstd}Louisiana State University{p_end}
 {pstd}{browse "mailto:christopherbmann@gmail.com":christopherbmann@gmail.com}{p_end}
+{pstd}{browse "http://www.christopherbmann.com/":http://www.christopherbmann.com}{p_end}
 
 {title:Acknowledgements}
 
