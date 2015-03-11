@@ -80,4 +80,4 @@ Lock Morgan, K. (2011). Rerandomization to improve covariate balance in randomiz
 
 {title:Acknowledgements}
 
-{phang} Thank you to Debby Kermer for earlier contributions to parts of the algorithm, to John Ternovski for helpful comments, and to Kari Lock Morgan for the underlying theory and suggestion of the Wilks lambda balance statistic.
+{phang} We thank Debby Kermer for earlier contributions to parts of the algorithm, John Ternovski for helpful comments, and Kari Lock Morgan for the underlying theory and suggestion of the Wilks lambda balance statistic.
