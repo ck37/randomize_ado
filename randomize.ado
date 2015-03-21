@@ -111,7 +111,7 @@ local `num_balance_vars': word count `balance'
 * Renumber strata for each data subset.
 if "`block'" != "" {
 	egen `strata_current' = group(`block') if `touse', label missing
-	dis "Strata breakdown:"
+	dis "Block breakdown:"
 	tab `strata_current' if `touse'
 	local `num_strata' = r(r)
 }
@@ -150,7 +150,7 @@ forvalues `strata_num' = 1/``num_strata'' {
 		dis "Randomizing ``strata_size'' records."
 	}
 	else {
-		dis "Randomizing stratum ``strata_num'' with ``strata_size'' records."
+		dis "Randomizing block ``strata_num'' with ``strata_size'' records."
 	}
 	
 	* Tracking variations for the rerandomization procedure.
@@ -239,10 +239,10 @@ forvalues `strata_num' = 1/``num_strata'' {
 			local `best_end_seed' = c(seed)
 			local `used_try' = "*"
 		}
-		``hide_details'' dis "Strata ``strata_num'', Try " as result %2.0f ``tries'' as text ": Balance p-value = " as result %06.4f ``joint_p'' as text ".``used_try''" 
+		``hide_details'' dis "Block ``strata_num'', Try " as result %2.0f ``tries'' as text ": Balance p-value = " as result %06.4f ``joint_p'' as text ".``used_try''" 
 	}
 	``hide_details'' dis "----"
-	``hide_details'' dis "Strata ``strata_num''. Tries: ``tries''. Best run: ``best_run''. Balance p-value: " as result %06.4f round(``best_joint_p'', .0001) as text "."
+	``hide_details'' dis "Block ``strata_num''. Tries: ``tries''. Best run: ``best_run''. Balance p-value: " as result %06.4f round(``best_joint_p'', .0001) as text "."
 	``hide_details'' dis "Start seed: ``best_start_seed''. End seed: ``best_end_seed''."
 		
 	*------------------------------------------
