@@ -49,13 +49,71 @@ per cluster. The randomization algorithm can then be run on that dataset, and th
 
 1. Randomize a dataset into 2 groups, checking for balance by gender.
 {phang}
-{cmd:. randomize, balance(gender)}
+{inp:. randomize, balance(gender)}
 
+2. Randomize a dataset into 5 equally-sized groups, blocking by state and gender.
 {phang}
-{cmd:. randomize, groups(3) balance(age gender) jointp(0.2)}
+{inp:. randomize, groups(3) balance(age gender) jointp(0.2)}
 
+3. Randomize a dataset into 3 groups, checking for balance on age and gender. Rerandomize up to 100 times or until the balance p-value exceeds 0.2.
 {phang}
-{cmd:. randomize if in_sample == 1, groups(4) balance(gender race age) block(state) minruns(500) seed(1)}
+{inp:. randomize, groups(3) balance(age gender) jointp(0.2) maxruns(100)}
+
+4. Create 4 groups, check for covariate balance on gender, race, and age, block on state, choose the most balanced of 500 randomizations within each block, and specify the random number generator seed.
+{phang}
+{inp:. randomize, groups(4) balance(gender race age) block(state) minruns(500) seed(1)}
+
+5. Create a 10% / 20% / 70% split by randomizing into 10 equally sized groups then aggregating those assignments.
+{phang}
+{inp:. randomize, groups(10) aggregate(1 2 7)}
+
+6. Use the quiet prefix to hide all randomization output and just get the result.
+{phang}
+{inp:. quiet randomize, balance(state) minruns(1000)}
+
+7. Use the details option to show all randomization output.
+{phang}
+{inp:. randomize, balance(state) minruns(1000) details}
+
+8. Simulated dataset example - randomize 10,000 records across 4 blocks, and take the best randomization out of 500 per block.
+{phang}{inp: clear}{p_end}
+{phang}{inp: set obs 10000}{break}{p_end}
+{phang}{inp: set seed 2}{p_end}
+{phang}{inp: gen covariate = uniform()}{p_end}
+{phang}{inp: gen block_var = ceil(uniform() * 4)}{p_end}
+{phang}{inp: randomize, block(block_var) balance(covariate) minruns(500)}{p_end}
+
+9. Clustered Randomization v1 - select a random record within the cluster, conduct the randomization on those records, then apply the assignment to the full cluster.
+{phang}{inp: * Create a combined cluster id}{p_end}
+{phang}{inp: egen cluster_id = group(cluster_field1 cluster_field2)}{p_end}
+{phang}{inp: set seed 1}{p_end}
+{phang}{inp: set sortseed 2}{p_end}
+{phang}{inp: gen double random = runiform()}{p_end}
+{phang}{inp: * Randomly order individuals within clusters.}{p_end}
+{phang}{inp: bysort cluster_id (random): egen cluster_seq = seq()}{p_end}
+{phang}{inp: * Randomize using the demographics of the first cluster member to check for balance.}{p_end}
+{phang}{inp: randomize if cluster_seq == 1, balance(covar1 covar2) block(blockvar1 blockvar2) replace}{p_end}
+{phang}{inp: * Expand assignment to all units in the cluster.}{p_end}
+{phang}{inp: bysort cluster_id: egen assignment = mode(_assignment)}{p_end}
+
+
+10. Clustered Randomization v2 - compress the dataset to the cluster level, conduct the randomization, then merge the assignment back to the full dataset.
+{phang}{inp: * Create a combined cluster id}{p_end}
+{phang}{inp: egen cluster_id = group(cluster_field1 cluster_field2)}{p_end}
+{phang}{inp: set seed 1}{p_end}
+{phang}{inp: set sortseed 2}{p_end}
+{phang}{inp: * Save the uncompressed version of the dataset.}{p_end}
+{phang}{inp: preserve}{p_end}
+{phang}{inp: * Aggregate to the cluster level, creating summary statistics for the randomization.}{p_end}
+{phang}{inp: collapse (mean) covar1 covar2 (max) rare_covar3 (count) cluster_size, by(cluster_id)}{p_end}
+{phang}{inp: * Execute the randomization at the cluster level.}{p_end}
+{phang}{inp: randomize, balance(covar1 covar2 rare_covar3) replace}{p_end}
+{phang}{inp: * Restrict to the data that we need.}{p_end}
+{phang}{inp: keep cluster_id _assignment}{p_end}
+{phang}{inp: save "cluster-assignments.dta", replace}{p_end}
+{phang}{inp: * Switch back to the full dataset.}{p_end}
+{phang}{inp: restore}{p_end}
+{phang}{inp: merge m:1 cluster_id using "cluster-assignments.data"}{p_end}
 
 {title:References}
 
@@ -66,6 +124,10 @@ Lock Morgan, K. and Rubin, D. B. (2012). Rerandomization to improve covariate ba
 {phang}
 Lock Morgan, K. (2011). Rerandomization to improve covariate balance in randomized experiments. PhD dissertation. Harvard University, Department of Statistics.
 {p_end}
+
+{title:Website}
+
+{pstd}{cmd:Randomize} is maintained at {browse "http://github.com/ck37/randomize_ado":http://github.com/ck37/randomize_ado}{p_end}
 
 {title:Authors}
 
