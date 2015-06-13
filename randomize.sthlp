@@ -47,6 +47,7 @@ per cluster. The randomization algorithm can then be run on that dataset, and th
 
 {marker ex}{title:Examples}
 
+1. Randomize a dataset into 2 groups, checking for balance by gender.
 {phang}
 {cmd:. randomize, balance(gender)}
 
@@ -74,7 +75,7 @@ Lock Morgan, K. (2011). Rerandomization to improve covariate balance in randomiz
 {pstd}{browse "http://ck37.com":http://ck37.com}{p_end}
 
 {pstd}Christopher B. Mann{p_end}
-{pstd}Louisiana State University{p_end}
+{pstd}Skidmore College{p_end}
 {pstd}{browse "mailto:christopherbmann@gmail.com":christopherbmann@gmail.com}{p_end}
 {pstd}{browse "http://www.christopherbmann.com/":http://www.christopherbmann.com}{p_end}
 

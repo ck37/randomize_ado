@@ -1,3 +1,3 @@
 v 3
-d Chris J. Kennedy, University of California, Berkeley. Christopher B. Mann, Louisiana State University.
+d Chris J. Kennedy, University of California, Berkeley. Christopher B. Mann, Skidmore College.
 p 'RANDOMIZE': create random assignments for experimental trials, including blocking, balance checking, and automated rerandomization.
