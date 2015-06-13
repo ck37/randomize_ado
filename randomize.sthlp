@@ -41,6 +41,7 @@ This allows for unequal allocation sizes while still checking balance on equally
 If blocking variables are specified it will conduct the randomization within blocks. It can rerandomize within blocks a certain number of times, such as conducting 100 randomizations
 and choosing the randomization with the best balance across covariates. It can also rerandomize until the balance statistic (Wilks' lambda on a manova)
 exceeds a certain cut-off value (e.g. 0.2). If unequal allocation sizes are desired, multiple groups can be aggregated after the randomization.
+Assignments are allocated in a random order within each block, ensuring that group sizes differ by no more than one observation in each block.
 
 {pstd} For clustered random assignment, one will need to handle the clustering manually, such as collapsing the dataset to the cluster level or choosing one representative unit
 per cluster. The randomization algorithm can then be run on that dataset, and the assignments can be copied to all units in the cluster.
