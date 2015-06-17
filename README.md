@@ -8,7 +8,11 @@ We do not yet support factor variable syntax in the balance check so categorical
 
 ## Installation
 
-### Net install (Recommended)
+### SSC
+
+Install from SSC by simply typing "ssc install randomize" into the Stata command prompt. This may provide a slightly less up-to-date version than installing from github.
+
+### Net install
 
 Stata 13 can install directly from github. If using Stata 12 this method may not work due to the "https".
 
