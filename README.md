@@ -9,7 +9,7 @@ series of indicators.
 
 ## Requirements
 
-This module is compatable with Stata version 12 or higher.
+This module is compatible with Stata version 12 or higher.
 
 ## Installation
 
