@@ -1,5 +1,5 @@
 
-program define randomize
+program define randomize, rclass sortpreserve
 version 12.0
 
 /*
@@ -40,10 +40,22 @@ qui: marksample touse
 
 tempname balance_vars rand_seed total hide_details default_generate gen_internal value
 
+
+* Save configuration variables into the return list.
+return local groups `groups'
+return local minruns `minruns'
+return local maxruns `maxruns'
+return local jointp `jointp'
+
 loc `default_generate' = "_assignment"
 
 local `balance_vars' "`balance'"
 local `rand_seed' `seed'
+
+* Save the balance configuration in the return list.
+return local balance `balance'
+* Save random number seed in the return list.
+return local rand_seed `seed'
 
 * Process the generate option.
 if "`generate'" == "" {
@@ -64,6 +76,9 @@ if _rc == 0 {
    }
 }
 
+* Save the generate variable name in the return list.
+return local generate `generate'
+
 * By default hide the detailed calculations.
 local `hide_details' = "qui"
 if "`details'" != "" {
@@ -82,6 +97,8 @@ if "`aggregate'" != "" {
 		exit
 	}
 }
+* Save the aggregate configuration in the return list.
+return local aggregate `aggregate'
 
 * Handle clustering if it was specified.
 if "`cluster'" != "" {
@@ -91,6 +108,9 @@ if "`cluster'" != "" {
 	* TODO: ensure this works appropriately with automatic block creation.
 	egen `cluster_id' = group(`cluster')
 }
+
+* Save the cluster configuration in the return list.
+return local cluster `cluster'
 
 * Create the assignment variable. Start with a byte to conserve space; Stata will automatically promote to a larger number if the # of groups is large.
 qui gen byte `generate' = . if `touse'
@@ -120,6 +140,9 @@ else {
 	gen `strata_current' = 1 if `touse'
 	local `num_strata' = 1
 }
+
+* Save the block configuration in the return list.
+return local block `block'
 
 
 *-------------------------------------------------------------------------- 
@@ -350,7 +373,8 @@ if "`aggregate'" != "" {
 }
 
 * Restore the original ordering of the dataset in case it was being used.
-sort `standard_order'
+* sort `standard_order'
+* This should be done automatically by sortpreserve now.
 	
 * TODO: display timer count.
 
