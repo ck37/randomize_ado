@@ -4,11 +4,24 @@
 
 For clustered random assignment, one will need to handle the clustering manually, such as collapsing the dataset to the cluster level or choosing one representative unit per cluster. The randomization algorithm can then be run on that dataset, and the assignments can be copied to all units in the cluster. Examples are provided below.
 
-We do not yet support factor variable syntax in the balance check so categorical variables will need to be converted to a series of indicators.
+We do not yet support factor variable syntax in the balance check so categorical variables will need to be converted to a 
+series of indicators.
+
+## Requirements
+
+This module is compatible with Stata version 12 or higher.
 
 ## Installation
 
-### Net install (Recommended)
+### SSC
+
+Installing from SSC is the simplest method, although it may provide a slightly less up-to-date version than installing from github.
+
+```stata
+. ssc install randomize
+```
+
+### Net install
 
 Stata 13 can install directly from github. If using Stata 12 this method may not work due to the "https".
 
