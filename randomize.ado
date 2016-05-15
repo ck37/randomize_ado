@@ -5,7 +5,7 @@ version 12.0
 /*
 *
 *!Author: Chris J. Kennedy, Christopher B. Mann
-*!Date: 2015-03-05
+*!Date: 2016-05-15
 *
 * Note: Stata version 12 is required due to the p-value matrix on regression results, but CM has a code fix to support version 11 if needed.
 */
