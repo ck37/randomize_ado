@@ -5,7 +5,7 @@ version 12.0
 /*
 *
 *!Author: Chris J. Kennedy, Christopher B. Mann
-*!Date: 2016-05-15
+*!Date: 2017-06-01
 *
 * Note: Stata version 12 is required due to the p-value matrix on regression results, but CM has a code fix to support version 11 if needed.
 */
@@ -230,24 +230,35 @@ forvalues `strata_num' = 1/``num_strata'' {
 			qui replace `generate' = ``val'' if `strata_cnt' <= ceil(``strata_size'' * ``rand_group'' / `groups') & `strata_current' == ``strata_num''
 		}
 		
-		* Do a multivariate comparison of means for the balance check, extracting the Wilk's lambda p-value.
-		cap ``hide_details'' mvtest means ``balance_vars'' if `strata_current' == ``strata_num'', by(`generate')
-		* NOTE: in very rare cases, the manova will fail for some reason. Here we recover from the error if it occurs, discarding the randomization.
-		* The capture has the unfortunate side effect of also hiding the manova test even if details are requested, but we can live with it.
-		if _rc == 506 {
-			* Set p to 0 so that this run is discarded.
-			local `joint_p' = 0
-		}
-		else if _rc == 0 {
-			matrix `p' = r(stat_m)
-			* Extract the Wilks' lambda.
-			local `joint_p' = `p'[1, 5]
-			* Set this just to keep the current algorithm working.
-			local `temp_min' = 0
+		* Skip balance check if there are no balance vars.
+		
+		if "``balance_vars''" != "" {
+		    * dis "Checking balance on: ``balance_vars''"
+		
+			* Do a multivariate comparison of means for the balance check, extracting the Wilk's lambda p-value.
+			cap ``hide_details'' mvtest means ``balance_vars'' if `strata_current' == ``strata_num'', by(`generate')
+			* NOTE: in very rare cases, the manova will fail for some reason. Here we recover from the error if it occurs, discarding the randomization.
+			* The capture has the unfortunate side effect of also hiding the manova test even if details are requested, but we can live with it.
+			if _rc == 506 {
+				* Set p to 0 so that this run is discarded.
+				local `joint_p' = 0
+			}
+			else if _rc == 0 {
+				matrix `p' = r(stat_m)
+				* Extract the Wilks' lambda.
+				local `joint_p' = `p'[1, 5]
+				* Set this just to keep the current algorithm working.
+				local `temp_min' = 0
+			}
+			else {
+				dis as err "Error in the manova test."
+				* Set p to 0 so that this run is discard.
+				local `joint_p' = 0
+			}
 		}
 		else {
-			dis as err "Error in the manova test."
-			* Set p to 0 so that this run is discard.
+			* No balance vars, so this is always a good randomization.
+			dis "No balance variables so skipping balance checking."
 			local `joint_p' = 0
 		}
 
@@ -331,14 +342,17 @@ forvalues `strata_num' = 1/``num_strata'' {
 	}
 	tab `generate' if `strata_current' == ``strata_num'', missing
 
-	if "`block'" != "" {
-		dis as text _n "Review balance within block ``strata_num'':"
-	}
-	else {
-		dis as text _n "Review balance:"
-	}
-	mlogit `generate' ``balance_vars'' if `strata_current' == ``strata_num'', base(1) noomitted nolog
-			
+	* Only review balance if we have balance variables defined.
+	if "``balance_vars''" != "" {
+		if "`block'" != "" {
+			dis as text _n "Review balance within block ``strata_num'':"
+		}
+		else {
+			dis as text _n "Review balance:"
+		}
+	
+		mlogit `generate' ``balance_vars'' if `strata_current' == ``strata_num'', base(1) noomitted nolog
+	}	
 }
 
 * Review the group assignments across all blocks.
